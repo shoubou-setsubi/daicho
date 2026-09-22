@@ -110,7 +110,7 @@
     }
     .tag-chip:active { background-color: #e2e8f0; }
 
-    /* タグカラー分け */
+    /* タグカラー */
     .tag-chip.type-process { background-color: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
     .tag-chip.type-equipment { background-color: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
     .tag-chip.result-ok { background-color: #dcfce7; color: #166534; border-color: #86efac; }
@@ -141,7 +141,7 @@
     .page-title { font-size: 18px; font-weight: bold; color: #0f172a; letter-spacing: 1px; }
     .page-meta { font-size: 11px; color: #334155; text-align: right; line-height: 1.4; }
 
-    /* 配置グリッドレイアウト */
+    /* グリッドレイアウト */
     .photo-grid { display: grid; gap: 6mm 6mm; }
     .grid-1 { grid-template-columns: 1fr; }
     .grid-2 { grid-template-columns: 1fr; }
@@ -161,7 +161,6 @@
       position: relative;
     }
 
-    /* 各枚数ごとの枠高さ調整 */
     .photo-box {
       width: 100%;
       background: #e2e8f0;
@@ -290,25 +289,17 @@
       .photo-controls, .photo-overlay-actions { display: none !important; }
       .photo-box { border: none !important; background: transparent !important; }
 
-      /* ★ 印刷・PDF時に記入例（プレースホルダー）を完全に非表示・無効化 ★ */
-      input::placeholder,
-      input::-webkit-input-placeholder,
-      input:-moz-placeholder,
-      input::-moz-placeholder,
-      input:-ms-input-placeholder {
-        color: transparent !important;
-        opacity: 0 !important;
-        -webkit-text-fill-color: transparent !important;
-        font-size: 0 !important;
-        text-shadow: none !important;
-      }
-
       .caption-group input {
         border: none !important;
         border-bottom: 1px solid #94a3b8 !important;
         border-radius: 0 !important;
         padding: 2px 0 !important;
         background: transparent !important;
+      }
+
+      /* 印刷時：未使用枠を完全に消去して詰める */
+      .photo-card.is-empty-card {
+        display: none !important;
       }
     }
   </style>
@@ -321,7 +312,7 @@
     <div class="nav-buttons">
       <button class="btn btn-slate" onclick="addPage()">＋ ページ追加</button>
       <button class="btn btn-amber" onclick="clearAllData()">🗑 リセット</button>
-      <button class="btn btn-emerald" onclick="window.print()">🖨️ PDF・印刷出力</button>
+      <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷出力</button>
     </div>
   </div>
 
@@ -362,13 +353,12 @@
       </div>
     </div>
 
-    <!-- カテゴリ別 ワンタップ定型文パレット -->
+    <!-- 定型文パレット -->
     <div class="quick-tags-panel no-print">
       <div class="quick-tags-header">
         <span>⚡ ワンタップ定型文（入力欄を選択してからタップ）</span>
       </div>
       
-      <!-- ① 工程・作業 -->
       <div class="quick-section">
         <div class="quick-section-label">【工程・作業】</div>
         <div class="quick-tags-group">
@@ -385,7 +375,6 @@
         </div>
       </div>
 
-      <!-- ② 消防用設備の種類 -->
       <div class="quick-section">
         <div class="quick-section-label">【消防用設備】</div>
         <div class="quick-tags-group">
@@ -395,14 +384,14 @@
           <span class="tag-chip type-equipment" onclick="insertTag('自動火災報知設備')">自火報</span>
           <span class="tag-chip type-equipment" onclick="insertTag('感知器')">感知器</span>
           <span class="tag-chip type-equipment" onclick="insertTag('誘導灯')">誘導灯</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('避難器具')">避難器具</span>
           <span class="tag-chip type-equipment" onclick="insertTag('非常照明')">非常照明</span>
+          <span class="tag-chip type-equipment" onclick="insertTag('避難器具')">避難器具</span>
+          <span class="tag-chip type-equipment" onclick="insertTag('連結送水管')">連結送水管</span>
           <span class="tag-chip type-equipment" onclick="insertTag('スプリンクラー')">SP設備</span>
           <span class="tag-chip type-equipment" onclick="insertTag('非常放送設備')">非常放送</span>
         </div>
       </div>
 
-      <!-- ③ 状況・判定結果 -->
       <div class="quick-section">
         <div class="quick-section-label">【状況・判定】</div>
         <div class="quick-tags-group">
@@ -444,6 +433,54 @@
       }
       updateHeader();
     };
+
+    /* ★ 印刷・PDF制御 (beforeprint / afterprint イベントによる完全自動制御) ★ */
+    window.addEventListener('beforeprint', preparePrint);
+    window.addEventListener('afterprint', restorePrint);
+
+    function preparePrint() {
+      // 1. プレースホルダー（記入例ガイド）を退避して一時消去（多重実行ガード付き）
+      document.querySelectorAll('input[placeholder]').forEach(input => {
+        if (input.placeholder !== '') {
+          input.dataset.tempPlaceholder = input.placeholder;
+          input.placeholder = '';
+        }
+      });
+
+      // 2. 「写真なし」かつ「文字入力なし」のカードを判定して非表示クラスを付与
+      document.querySelectorAll('.photo-card').forEach(card => {
+        const img = card.querySelector('img');
+        const inputs = card.querySelectorAll('.caption-group input');
+        
+        const rawSrc = img ? (img.getAttribute('src') || '') : '';
+        const hasImg = rawSrc.length > 0 && img.style.display !== 'none';
+        const hasText = Array.from(inputs).some(input => input.value.trim().length > 0);
+
+        if (!hasImg && !hasText) {
+          card.classList.add('is-empty-card');
+        } else {
+          card.classList.remove('is-empty-card');
+        }
+      });
+    }
+
+    function restorePrint() {
+      // 1. プレースホルダーを元の文字列に完全復元
+      document.querySelectorAll('input[data-temp-placeholder]').forEach(input => {
+        input.placeholder = input.dataset.tempPlaceholder;
+        delete input.dataset.tempPlaceholder;
+      });
+
+      // 2. 画面表示用のカード非表示クラスを解除
+      document.querySelectorAll('.photo-card.is-empty-card').forEach(card => {
+        card.classList.remove('is-empty-card');
+      });
+    }
+
+    function doPrint() {
+      // ブラウザ標準の印刷ダイアログを呼び出し（beforeprint / afterprint が自動的に安全に発火します）
+      window.print();
+    }
 
     function getCardCountForMode(mode) {
       const match = mode.match(/grid-(\d+)/);
@@ -641,7 +678,7 @@
       const btnGroup = document.getElementById(`btn-group-${cardId}`);
       const overlay = document.getElementById(`overlay-${cardId}`);
 
-      imgEl.src = '';
+      imgEl.removeAttribute('src');
       imgEl.style.display = 'none';
       imgEl.setAttribute('data-rotate', '0');
       imgEl.style.transform = 'rotate(0deg)';
@@ -673,7 +710,7 @@
           const imgEl = document.getElementById(`img-${cardId}`);
           if (imgEl) {
             data.cards[cardId] = {
-              imgSrc: imgEl.src.startsWith('data:') ? imgEl.src : '',
+              imgSrc: imgEl.style.display !== 'none' && imgEl.src.startsWith('data:') ? imgEl.src : '',
               rotate: imgEl.getAttribute('data-rotate') || '0',
               t1: document.getElementById(`t1-${cardId}`)?.value || '',
               t2: document.getElementById(`t2-${cardId}`)?.value || '',
