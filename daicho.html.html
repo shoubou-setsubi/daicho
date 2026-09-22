@@ -1,0 +1,422 @@
+<!daityo html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>消防設備 写真台帳作成</title>
+  <style>
+    /* 全体基本スタイル */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f3f4f6;
+      color: #333;
+      padding-bottom: 80px;
+    }
+
+    /* 操作バー（画面上部固定） */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: #1f2937;
+      color: #fff;
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .toolbar h1 {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn {
+      background-color: #2563eb;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn:active {
+      transform: scale(0.98);
+    }
+    .btn-green { background-color: #059669; }
+    .btn-gray { background-color: #4b5563; }
+    .btn-danger { background-color: #dc2626; }
+
+    /* メインエリア */
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+
+    /* 基本情報入力パネル */
+    .meta-panel {
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px;
+    }
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .input-group label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #6b7280;
+    }
+    .input-group input {
+      padding: 8px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    /* A4用紙スタイルのページ */
+    .page {
+      background: #fff;
+      width: 100%;
+      max-width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto 30px auto;
+      padding: 15mm 12mm;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 4px;
+      position: relative;
+    }
+
+    .page-header {
+      border-bottom: 2px solid #111;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+    .page-header h2 {
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    .page-header-info {
+      font-size: 12px;
+      text-align: right;
+    }
+
+    /* 写真グリッド（A4サイズ1ページに6枠配置：2列×3行） */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: repeat(3, 1fr);
+      gap: 10mm 8mm;
+    }
+
+    .photo-card {
+      border: 1px solid #ccc;
+      padding: 6px;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    /* 画像表示枠 */
+    .photo-box {
+      width: 100%;
+      height: 140px;
+      background: #e5e7eb;
+      border: 1px dashed #9ca3af;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    .photo-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+    }
+    .photo-box-buttons {
+      display: flex;
+      gap: 8px;
+      z-index: 2;
+    }
+    .photo-btn {
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #888;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #333;
+    }
+    .file-input {
+      display: none;
+    }
+
+    .clear-photo-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(220, 38, 38, 0.85);
+      color: #fff;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      z-index: 3;
+    }
+
+    /* 入力テキスト（消防用3段構成） */
+    .caption-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .caption-inputs input {
+      width: 100%;
+      padding: 4px 6px;
+      font-size: 11px;
+      border: 1px solid #d1d5db;
+      border-radius: 3px;
+      background: #fff;
+    }
+
+    /* 印刷時のスタイル定義（A4ぴったりに調整） */
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+      }
+      .toolbar, .meta-panel, .no-print {
+        display: none !important;
+      }
+      .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .page {
+        box-shadow: none;
+        border-radius: 0;
+        width: 210mm;
+        height: 296mm; /* A4高さいっぱい */
+        padding: 10mm;
+        margin: 0 auto;
+        page-break-after: always;
+        break-after: page;
+      }
+      .photo-box-buttons, .clear-photo-btn {
+        display: none !important;
+      }
+      .photo-box {
+        border: none;
+        background: transparent;
+      }
+      .caption-inputs input {
+        border: none;
+        border-bottom: 1px solid #ccc;
+        background: transparent;
+        padding: 2px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 操作バー -->
+  <div class="toolbar">
+    <h1>📷 消防設備写真台帳</h1>
+    <div class="toolbar-actions">
+      <button class="btn btn-gray" onclick="addPage()">＋ ページ追加</button>
+      <button class="btn btn-green" onclick="window.print()">🖨️ 印刷 / PDF出力</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- 基本情報パネル -->
+    <div class="meta-panel">
+      <div class="input-group">
+        <label for="buildingName">物件名・建物名</label>
+        <input type="text" id="buildingName" placeholder="〇〇ビル" oninput="updateHeader()">
+      </div>
+      <div class="input-group">
+        <label for="inspectDate">点検年月日</label>
+        <input type="date" id="inspectDate" onchange="updateHeader()">
+      </div>
+      <div class="input-group">
+        <label for="inspector">点検者名</label>
+        <input type="text" id="inspector" placeholder="点検 太郎" oninput="updateHeader()">
+      </div>
+    </div>
+
+    <!-- 台帳ページエリア -->
+    <div id="pagesContainer"></div>
+  </div>
+
+  <script>
+    let pageCount = 0;
+
+    // 初期化（1ページ目を追加し、本日の日付をセット）
+    window.onload = function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('inspectDate').value = today;
+      addPage();
+      updateHeader();
+    };
+
+    // ヘッダー情報のリアルタイム同期
+    function updateHeader() {
+      const bName = document.getElementById('buildingName').value || '（未入力）';
+      const dVal = document.getElementById('inspectDate').value;
+      const dateStr = dVal ? dVal.replace(/-/g, '/') : '';
+      const inspector = document.getElementById('inspector').value;
+
+      document.querySelectorAll('.display-building').forEach(el => el.textContent = bName);
+      document.querySelectorAll('.display-date').forEach(el => el.textContent = dateStr);
+      document.querySelectorAll('.display-inspector').forEach(el => el.textContent = inspector ? `点検者: ${inspector}` : '');
+    }
+
+    // 新しいページを追加する関数（1ページ6枠）
+    function addPage() {
+      pageCount++;
+      const pagesContainer = document.getElementById('pagesContainer');
+      const page = document.createElement('div');
+      page.className = 'page';
+      page.id = `page-${pageCount}`;
+
+      let cardsHtml = '';
+      for (let i = 1; i <= 6; i++) {
+        const cardId = `p${pageCount}-c${i}`;
+        cardsHtml += `
+          <div class="photo-card">
+            <div class="photo-box" id="box-${cardId}">
+              <img id="img-${cardId}" src="" alt="点検写真">
+              <button class="clear-photo-btn" id="del-${cardId}" onclick="clearPhoto('${cardId}')">✕</button>
+              <div class="photo-box-buttons" id="btn-group-${cardId}">
+                <button class="photo-btn" onclick="triggerFile('${cardId}', true)">📷 撮影</button>
+                <button class="photo-btn" onclick="triggerFile('${cardId}', false)">🖼️ 選択</button>
+              </div>
+              <!-- 撮影用 input (カメラ起動) -->
+              <input type="file" id="input-cam-${cardId}" class="file-input" accept="image/*" capture="environment" onchange="handleFileSelect(event, '${cardId}')">
+              <!-- 選択用 input (ファイルライブラリ) -->
+              <input type="file" id="input-lib-${cardId}" class="file-input" accept="image/*" onchange="handleFileSelect(event, '${cardId}')">
+            </div>
+            <div class="caption-inputs">
+              <input type="text" placeholder="① 設備名 (例: 消火器 No.1)">
+              <input type="text" placeholder="② 設置場所 (例: 1階 エントランス)">
+              <input type="text" placeholder="③ 状態・備考 (例: 外観良好 / ゲージ適正)">
+            </div>
+          </div>
+        `;
+      }
+
+      page.innerHTML = `
+        <div class="page-header">
+          <h2>消防用設備等 点検写真帳</h2>
+          <div class="page-header-info">
+            <div>物件名: <span class="display-building"></span></div>
+            <div>点検日: <span class="display-date"></span> <span class="display-inspector"></span></div>
+          </div>
+        </div>
+        <div class="photo-grid">
+          ${cardsHtml}
+        </div>
+        <div class="no-print" style="margin-top: 10px; text-align: right;">
+          ${pageCount > 1 ? `<button class="btn btn-danger" onclick="removePage('page-${pageCount}')">このページを削除</button>` : ''}
+        </div>
+      `;
+
+      pagesContainer.appendChild(page);
+      updateHeader();
+    }
+
+    // ページの削除
+    function removePage(pageId) {
+      const pageEl = document.getElementById(pageId);
+      if (pageEl) {
+        pageEl.remove();
+      }
+    }
+
+    // カメラ/アルバムの選択をトリガー
+    function triggerFile(cardId, isCamera) {
+      if (isCamera) {
+        document.getElementById(`input-cam-${cardId}`).click();
+      } else {
+        document.getElementById(`input-lib-${cardId}`).click();
+      }
+    }
+
+    // 画像選択時の処理（プレビュー化）
+    function handleFileSelect(event, cardId) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imgEl = document.getElementById(`img-${cardId}`);
+        const btnGroup = document.getElementById(`btn-group-${cardId}`);
+        const delBtn = document.getElementById(`del-${cardId}`);
+
+        imgEl.src = e.target.result;
+        imgEl.style.display = 'block';
+        btnGroup.style.display = 'none';
+        delBtn.style.display = 'flex';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // 画像の削除
+    function clearPhoto(cardId) {
+      const imgEl = document.getElementById(`img-${cardId}`);
+      const btnGroup = document.getElementById(`btn-group-${cardId}`);
+      const delBtn = document.getElementById(`del-${cardId}`);
+      const inputCam = document.getElementById(`input-cam-${cardId}`);
+      const inputLib = document.getElementById(`input-lib-${cardId}`);
+
+      imgEl.src = '';
+      imgEl.style.display = 'none';
+      btnGroup.style.display = 'flex';
+      delBtn.style.display = 'none';
+      inputCam.value = '';
+      inputLib.value = '';
+    }
+  </script>
+</body>
+</html>
