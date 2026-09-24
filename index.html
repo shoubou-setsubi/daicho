@@ -13,20 +13,20 @@
       --text-main: #0f172a;
       --text-muted: #64748b;
       --border-color: #e2e8f0;
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
       --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.12);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: var(--bg-main);
       color: var(--text-main);
-      padding-bottom: 90px;
+      padding-bottom: 120px; /* 下部フローティングバー用の余白 */
       -webkit-font-smoothing: antialiased;
     }
 
@@ -35,83 +35,90 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(15, 23, 42, 0.94);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: #fff;
-      padding: 12px 20px;
+      padding: 10px 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
     }
     .nav-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .nav-title span {
       background: linear-gradient(135deg, #38bdf8, #818cf8);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .nav-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+    @media (min-width: 600px) {
+      .nav-buttons { width: auto; justify-content: flex-end; }
+    }
 
     .btn {
       background-color: #334155;
       color: #fff;
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 8px 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 9px 14px;
       border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       transition: all 0.2s ease;
       box-shadow: var(--shadow-sm);
+      min-height: 40px;
+      flex: 1;
+      text-align: center;
     }
-    .btn:active { transform: translateY(1px); }
+    @media (min-width: 600px) { .btn { flex: none; } }
+    .btn:active { transform: translateY(1px); opacity: 0.9; }
     .btn-emerald {
       background: linear-gradient(135deg, #059669 0%, #10b981 100%);
       border: none;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
     }
-    .btn-emerald:hover { opacity: 0.95; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35); }
     .btn-amber { background-color: #d97706; border: none; }
     .btn-rose { background-color: #e11d48; border: none; }
 
     /* コンテナ */
-    .container { max-width: 880px; margin: 20px auto; padding: 0 14px; }
+    .container { max-width: 880px; margin: 12px auto; padding: 0 10px; }
 
     /* 基本情報入力パネル */
     .meta-panel {
       background: var(--card-bg);
-      padding: 18px 20px;
-      border-radius: var(--radius-lg);
-      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-md);
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
     }
-    .input-field { display: flex; flex-direction: column; gap: 6px; }
-    .input-field label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+    .input-field { display: flex; flex-direction: column; gap: 4px; }
+    .input-field label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; }
     .input-field input, .input-field select {
-      padding: 9px 12px;
+      padding: 10px 12px;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
-      font-size: 13px;
+      font-size: 14px; /* iPhone自動ズーム防止サイズ */
       background-color: #f8fafc;
       color: var(--text-main);
-      transition: all 0.15s ease;
+      min-height: 42px;
     }
     .input-field input:focus, .input-field select:focus {
       outline: none;
@@ -120,26 +127,34 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    /* 定型文パレット */
+    /* 上部定型文パレット（折りたたみ可能） */
     .quick-tags-panel {
       background: var(--card-bg);
-      padding: 16px 20px;
-      border-radius: var(--radius-lg);
-      margin-bottom: 20px;
+      border-radius: var(--radius-md);
+      margin-bottom: 14px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+    .quick-tags-header {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-main);
+      padding: 12px 16px;
+      background-color: #f1f5f9;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .quick-tags-body {
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-    .quick-tags-header {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
+    .quick-tags-body.is-hidden { display: none; }
     .quick-section { display: flex; flex-direction: column; gap: 6px; }
     .quick-section-label { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase; }
     .quick-tags-group { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -148,19 +163,18 @@
       background-color: #f1f5f9;
       border: 1px solid #cbd5e1;
       color: #334155;
-      padding: 6px 12px;
+      padding: 7px 12px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       user-select: none;
-      transition: all 0.15s ease;
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      min-height: 34px;
     }
-    .tag-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
-    .tag-chip:active { transform: translateY(0); }
+    .tag-chip:active { transform: scale(0.96); background-color: #e2e8f0; }
 
     .tag-chip.type-process { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
     .tag-chip.type-equipment { background-color: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
@@ -169,29 +183,72 @@
     .tag-chip.type-custom { background-color: #fef3c7; color: #b45309; border-color: #fde68a; }
 
     .tag-del-btn {
-      font-size: 10px;
+      font-size: 11px;
       color: #94a3b8;
       border-radius: 50%;
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       margin-left: 2px;
     }
-    .tag-del-btn:hover { background-color: rgba(0,0,0,0.1); color: #dc2626; }
 
     .add-tag-btn {
       background-color: #f8fafc;
       border: 1px dashed #94a3b8;
       color: #475569;
-      padding: 5px 12px;
+      padding: 7px 14px;
       border-radius: 20px;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      min-height: 36px;
     }
-    .add-tag-btn:hover { background-color: #e2e8f0; }
+
+    /* ★ スマホ用画面下部フローティング定型文バー ★ */
+    .mobile-float-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 10px 12px;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      transform: translateY(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .mobile-float-bar.is-visible {
+      transform: translateY(0);
+    }
+    .mobile-float-title {
+      font-size: 11px;
+      color: #94a3b8;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mobile-float-chips {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .mobile-float-chips::-webkit-scrollbar { display: none; }
+    .mobile-float-chips .tag-chip {
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
 
     /* A4台帳シート */
     .page {
@@ -199,8 +256,8 @@
       width: 100%;
       max-width: 210mm;
       min-height: 297mm;
-      margin: 0 auto 28px auto;
-      padding: 14mm 12mm;
+      margin: 0 auto 20px auto;
+      padding: 12mm 10mm;
       box-shadow: var(--shadow-lg);
       border-radius: 8px;
       position: relative;
@@ -211,13 +268,13 @@
     .page-header {
       border-bottom: 2px solid #0f172a;
       padding-bottom: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
     }
-    .page-title { font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: 1.5px; }
-    .page-meta { font-size: 11px; color: #475569; text-align: right; line-height: 1.5; font-weight: 500; }
+    .page-title { font-size: 18px; font-weight: 800; color: #0f172a; letter-spacing: 1px; }
+    .page-meta { font-size: 11px; color: #475569; text-align: right; line-height: 1.4; font-weight: 500; }
 
     /* グリッドレイアウト */
     .photo-grid { display: grid; gap: 6mm 6mm; }
@@ -230,14 +287,13 @@
 
     .photo-card {
       border: 1px solid #e2e8f0;
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 8px;
       background: #fafafa;
       display: flex;
       flex-direction: column;
       gap: 6px;
       position: relative;
-      transition: border-color 0.2s;
     }
 
     .photo-box {
@@ -250,13 +306,12 @@
       justify-content: center;
       position: relative;
       overflow: hidden;
-      transition: all 0.2s ease;
     }
-    .grid-1 .photo-box { height: 450px; }
-    .grid-2 .photo-box { height: 260px; }
-    .grid-3 .photo-box { height: 170px; }
-    .grid-4 .photo-box { height: 210px; }
-    .grid-6 .photo-box { height: 135px; }
+    .grid-1 .photo-box { height: 420px; }
+    .grid-2 .photo-box { height: 250px; }
+    .grid-3 .photo-box { height: 160px; }
+    .grid-4 .photo-box { height: 190px; }
+    .grid-6 .photo-box { height: 130px; }
     .grid-8 .photo-box { height: 95px; }
 
     .photo-box img {
@@ -264,65 +319,69 @@
       max-height: 100%;
       object-fit: contain;
       display: none;
-      transition: transform 0.2s;
     }
 
-    .photo-controls { display: flex; gap: 8px; z-index: 2; }
+    /* スマホで押しやすい大きめ撮影・選択ボタン */
+    .photo-controls { display: flex; gap: 8px; z-index: 2; width: 90%; justify-content: center; }
     .photo-btn {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 7px 14px;
+      padding: 8px 12px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       cursor: pointer;
-      color: #334155;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      transition: all 0.15s ease;
+      color: #1e293b;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+      flex: 1;
+      text-align: center;
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
-    .photo-btn:hover { background: #f8fafc; border-color: #94a3b8; }
 
     .photo-overlay-actions {
       position: absolute;
       top: 6px;
       right: 6px;
       display: none;
-      gap: 4px;
+      gap: 6px;
       z-index: 3;
     }
     .overlay-btn {
-      background: rgba(15, 23, 42, 0.82);
+      background: rgba(15, 23, 42, 0.88);
       backdrop-filter: blur(4px);
       color: #fff;
       border: none;
-      padding: 5px 10px;
-      border-radius: 4px;
+      padding: 6px 10px;
+      border-radius: 6px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s;
+      min-height: 32px;
     }
-    .overlay-btn-save { background: rgba(5, 150, 105, 0.9); }
-    .overlay-btn-del { background: rgba(225, 29, 72, 0.9); }
+    .overlay-btn-save { background: rgba(5, 150, 105, 0.95); }
+    .overlay-btn-del { background: rgba(225, 29, 72, 0.95); }
 
     .file-input { display: none; }
 
     /* キャプション入力欄 */
-    .caption-group { display: flex; flex-direction: column; gap: 4px; }
+    .caption-group { display: flex; flex-direction: column; gap: 5px; }
     .caption-group input {
       width: 100%;
-      padding: 5px 8px;
-      font-size: 11px;
+      padding: 7px 10px;
+      font-size: 13px; /* iOS自動ズーム防止 */
       border: 1px solid #cbd5e1;
-      border-radius: 4px;
+      border-radius: 6px;
       background: #fff;
       color: #1e293b;
-      transition: all 0.15s;
+      min-height: 36px;
     }
     .caption-group input:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
     }
 
     /* 自動保存ステータス */
@@ -350,7 +409,7 @@
         padding: 0 !important;
         background: #fff;
       }
-      .no-print, .nav-bar, .meta-panel, .quick-tags-panel, .save-status {
+      .no-print, .nav-bar, .meta-panel, .quick-tags-panel, .save-status, .mobile-float-bar {
         display: none !important;
       }
       .container {
@@ -403,7 +462,7 @@
     <div class="nav-buttons">
       <button class="btn" onclick="addPage()">＋ ページ追加</button>
       <button class="btn btn-amber" onclick="clearAllData()">🗑 リセット</button>
-      <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷出力</button>
+      <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷</button>
     </div>
   </div>
 
@@ -443,66 +502,69 @@
       </div>
     </div>
 
-    <!-- 定型文パレット -->
+    <!-- 上部定型文パレット（タップで開閉可能） -->
     <div class="quick-tags-panel no-print">
-      <div class="quick-tags-header">
-        <span>⚡ ワンタップ定型文パレット（タップで挿入 / ①番工程欄はドロップダウン直接選択も可能）</span>
+      <div class="quick-tags-header" onclick="toggleTagsBody()">
+        <span>⚡ ワンタップ定型文パレット</span>
+        <span id="tagsToggleIcon">▲ 閉じる</span>
       </div>
       
-      <!-- ① 工程・作業 -->
-      <div class="quick-section">
-        <div class="quick-section-label">工程・作業（①番のドロップダウンリストに対応）</div>
-        <div class="quick-tags-group">
-          <span class="tag-chip type-process" onclick="insertTag('施工前')">施工前</span>
-          <span class="tag-chip type-process" onclick="insertTag('施工中')">施工中</span>
-          <span class="tag-chip type-process" onclick="insertTag('施工後')">施工後</span>
-          <span class="tag-chip type-process" onclick="insertTag('取替前')">取替前</span>
-          <span class="tag-chip type-process" onclick="insertTag('取替中')">取替中</span>
-          <span class="tag-chip type-process" onclick="insertTag('取替後')">取替後</span>
-          <span class="tag-chip type-process" onclick="insertTag('納入機器')">納入機器</span>
-          <span class="tag-chip type-process" onclick="insertTag('撤去機器')">撤去機器</span>
-          <span class="tag-chip type-process" onclick="insertTag('試験状況')">試験状況</span>
+      <div class="quick-tags-body" id="quickTagsBody">
+        <!-- ① 工程・作業 -->
+        <div class="quick-section">
+          <div class="quick-section-label">工程・作業（①番のドロップダウンに対応）</div>
+          <div class="quick-tags-group">
+            <span class="tag-chip type-process" onclick="insertTag('施工前')">施工前</span>
+            <span class="tag-chip type-process" onclick="insertTag('施工中')">施工中</span>
+            <span class="tag-chip type-process" onclick="insertTag('施工後')">施工後</span>
+            <span class="tag-chip type-process" onclick="insertTag('取替前')">取替前</span>
+            <span class="tag-chip type-process" onclick="insertTag('取替中')">取替中</span>
+            <span class="tag-chip type-process" onclick="insertTag('取替後')">取替後</span>
+            <span class="tag-chip type-process" onclick="insertTag('納入機器')">納入機器</span>
+            <span class="tag-chip type-process" onclick="insertTag('撤去機器')">撤去機器</span>
+            <span class="tag-chip type-process" onclick="insertTag('試験状況')">試験状況</span>
+          </div>
         </div>
-      </div>
 
-      <!-- ② 消防用設備 -->
-      <div class="quick-section">
-        <div class="quick-section-label">消防用設備</div>
-        <div class="quick-tags-group">
-          <span class="tag-chip type-equipment" onclick="insertTag('消火器')">消火器</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('屋内消火栓設備')">屋内消火栓</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('屋外消火栓設備')">屋外消火栓</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('自動火災報知設備')">自火報</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('感知器')">感知器</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('誘導灯')">誘導灯</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('非常照明')">非常照明</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('避難器具')">避難器具</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('連結送水管')">連結送水管</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('スプリンクラー')">SP設備</span>
-          <span class="tag-chip type-equipment" onclick="insertTag('非常放送設備')">非常放送</span>
+        <!-- ② 消防用設備 -->
+        <div class="quick-section">
+          <div class="quick-section-label">消防用設備</div>
+          <div class="quick-tags-group">
+            <span class="tag-chip type-equipment" onclick="insertTag('消火器')">消火器</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('屋内消火栓設備')">屋内消火栓</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('屋外消火栓設備')">屋外消火栓</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('自動火災報知設備')">自火報</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('感知器')">感知器</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('誘導灯')">誘導灯</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('非常照明')">非常照明</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('避難器具')">避難器具</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('連結送水管')">連結送水管</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('スプリンクラー')">SP設備</span>
+            <span class="tag-chip type-equipment" onclick="insertTag('非常放送設備')">非常放送</span>
+          </div>
         </div>
-      </div>
 
-      <!-- ③ 状況・判定 -->
-      <div class="quick-section">
-        <div class="quick-section-label">状況・判定</div>
-        <div class="quick-tags-group">
-          <span class="tag-chip result-ok" onclick="insertTag('【良好】 作動確認済')">【良好】</span>
-          <span class="tag-chip result-ok" onclick="insertTag('【良】 新品交換完了')">【交換済】</span>
-          <span class="tag-chip result-ng" onclick="insertTag('【不良】 経年劣化')">【不良】</span>
-          <span class="tag-chip result-ng" onclick="insertTag('【要修繕】 機器障害')">【要修繕】</span>
-          <span class="tag-chip result-ng" onclick="insertTag('【要交換】 期限切れ')">【要交換】</span>
+        <!-- ③ 状況・判定 -->
+        <div class="quick-section">
+          <div class="quick-section-label">状況・判定</div>
+          <div class="quick-tags-group">
+            <span class="tag-chip result-ok" onclick="insertTag('【良好】 作動確認済')">【良好】</span>
+            <span class="tag-chip result-ok" onclick="insertTag('【良】 新品交換完了')">【交換済】</span>
+            <span class="tag-chip result-ng" onclick="insertTag('【不良】 経年劣化')">【不良】</span>
+            <span class="tag-chip result-ng" onclick="insertTag('【要修繕】 機器障害')">【要修繕】</span>
+            <span class="tag-chip result-ng" onclick="insertTag('【要交換】 期限切れ')">【要交換】</span>
+          </div>
         </div>
-      </div>
 
-      <!-- ④ マイ定型文グループ -->
-      <div class="quick-section">
-        <div class="quick-section-label">マイ定型文（自分で自由に編集・追加）</div>
-        <div class="quick-tags-group" id="customTagsContainer">
-          <!-- カスタムタグが動的追加されます -->
-        </div>
-        <div style="margin-top: 4px;">
-          <button class="add-tag-btn" onclick="addNewCustomTag()">＋ 定型文を新規登録</button>
+        <!-- ④ マイ定型文グループ -->
+        <div class="quick-section">
+          <div class="quick-section-label">マイ定型文（自分で自由に編集・追加）</div>
+          <div class="quick-tags-group" id="customTagsContainer">
+            <!-- カスタムタグが動的追加されます -->
+          </div>
+          <div style="margin-top: 4px;">
+            <button class="add-tag-btn" onclick="addNewCustomTag()">＋ 定型文を新規登録</button>
+          </div>
         </div>
       </div>
     </div>
@@ -511,13 +573,24 @@
     <datalist id="processList"></datalist>
 
     <!-- 自動保存表示 -->
-    <div class="save-status no-print" style="margin-bottom: 14px; justify-content: flex-end;">
+    <div class="save-status no-print" style="margin-bottom: 12px; justify-content: flex-end;">
       <span class="status-dot"></span>
       <span id="saveStatusText">自動保存が有効です</span>
     </div>
 
     <!-- 台帳ページコンテナ -->
     <div id="pagesContainer"></div>
+  </div>
+
+  <!-- ★ スマホ用画面下部フローティング定型文バー ★ -->
+  <div class="mobile-float-bar no-print" id="mobileFloatBar">
+    <div class="mobile-float-title">
+      <span id="floatBarCategory">⚡ 定型文をタップして挿入</span>
+      <span style="cursor: pointer; padding: 2px 8px;" onclick="hideFloatBar()">✕ 閉じる</span>
+    </div>
+    <div class="mobile-float-chips" id="mobileFloatChips">
+      <!-- 選択中の入力欄に応じたタグが動的セットされます -->
+    </div>
   </div>
 
   <script>
@@ -529,9 +602,11 @@
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('inspectDate').value = today;
 
+      // フォーカス監視（スマホ用フローティングバーの連動制御）
       document.addEventListener('focusin', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
           activeInput = e.target;
+          showFloatBarForInput(e.target);
         }
       });
 
@@ -542,6 +617,94 @@
       }
       updateHeader();
     };
+
+    function toggleTagsBody() {
+      const body = document.getElementById('quickTagsBody');
+      const icon = document.getElementById('tagsToggleIcon');
+      if (body.classList.contains('is-hidden')) {
+        body.classList.remove('is-hidden');
+        icon.textContent = '▲ 閉じる';
+      } else {
+        body.classList.add('is-hidden');
+        icon.textContent = '▼ 開く';
+      }
+    }
+
+    /* ★ スマホ下部フローティングバーの動的生成 ★ */
+    function showFloatBarForInput(inputEl) {
+      const floatBar = document.getElementById('mobileFloatBar');
+      const chipsContainer = document.getElementById('mobileFloatChips');
+      const titleEl = document.getElementById('floatBarCategory');
+
+      if (!inputEl.id || !inputEl.id.includes('-c')) {
+        hideFloatBar();
+        return;
+      }
+
+      let tags = [];
+      let categoryName = '';
+
+      if (inputEl.id.startsWith('t1-')) {
+        categoryName = '【① 工程】 タップで上書き';
+        tags = [
+          { text: '施工前', class: 'type-process' },
+          { text: '施工中', class: 'type-process' },
+          { text: '施工後', class: 'type-process' },
+          { text: '取替前', class: 'type-process' },
+          { text: '取替中', class: 'type-process' },
+          { text: '取替後', class: 'type-process' },
+          { text: '納入機器', class: 'type-process' },
+          { text: '撤去機器', class: 'type-process' },
+          { text: '試験状況', class: 'type-process' }
+        ];
+      } else if (inputEl.id.startsWith('t2-')) {
+        categoryName = '【② 設備】 タップで追加';
+        tags = [
+          { text: '消火器', class: 'type-equipment' },
+          { text: '屋内消火栓', class: 'type-equipment' },
+          { text: '自火報', class: 'type-equipment' },
+          { text: '感知器', class: 'type-equipment' },
+          { text: '誘導灯', class: 'type-equipment' },
+          { text: '非常照明', class: 'type-equipment' },
+          { text: '避難器具', class: 'type-equipment' },
+          { text: 'SP設備', class: 'type-equipment' }
+        ];
+      } else if (inputEl.id.startsWith('t3-')) {
+        categoryName = '【③ 判定】 タップで追加';
+        tags = [
+          { text: '【良好】', class: 'result-ok' },
+          { text: '作動確認済', class: 'result-ok' },
+          { text: '【良】 新品交換完了', class: 'result-ok' },
+          { text: '【不良】 経年劣化', class: 'result-ng' },
+          { text: '【要修繕】 機器障害', class: 'result-ng' },
+          { text: '【要交換】 期限切れ', class: 'result-ng' }
+        ];
+      }
+
+      // マイ定型文も最後に追加
+      customTags.forEach(ct => {
+        tags.push({ text: ct, class: 'type-custom' });
+      });
+
+      titleEl.textContent = categoryName;
+      chipsContainer.innerHTML = '';
+      tags.forEach(t => {
+        const chip = document.createElement('span');
+        chip.className = `tag-chip ${t.class}`;
+        chip.textContent = t.text;
+        chip.onmousedown = function(e) {
+          e.preventDefault(); // フォーカス外れを防止
+          insertTag(t.text);
+        };
+        chipsContainer.appendChild(chip);
+      });
+
+      floatBar.classList.add('is-visible');
+    }
+
+    function hideFloatBar() {
+      document.getElementById('mobileFloatBar').classList.remove('is-visible');
+    }
 
     /* ★ マイ定型文＆①番ドロップダウン同期機能 ★ */
     function loadCustomTags() {
@@ -654,6 +817,7 @@
     window.addEventListener('afterprint', restorePrint);
 
     function preparePrint() {
+      hideFloatBar();
       document.querySelectorAll('input[placeholder]').forEach(input => {
         if (input.placeholder !== '') {
           input.dataset.tempPlaceholder = input.placeholder;
