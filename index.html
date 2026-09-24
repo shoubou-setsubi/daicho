@@ -371,7 +371,7 @@
           <span class="tag-chip type-process" onclick="insertTag('納入機器')">納入機器</span>
           <span class="tag-chip type-process" onclick="insertTag('撤去機器')">撤去機器</span>
           <span class="tag-chip type-process" onclick="insertTag('試験状況')">試験状況</span>
-          <span class="tag-chip type-process" onclick="insertTag('全景')">全景</span>
+          
         </div>
       </div>
 
@@ -561,9 +561,9 @@
               <input type="file" id="input-lib-${cardId}" class="file-input" accept="image/*" onchange="handleFileSelect(event, '${cardId}')">
             </div>
             <div class="caption-group">
-              <input type="text" id="t1-${cardId}" placeholder="① 工程 (例: 施工前 消火器)" oninput="saveData()">
+              <input type="text" id="t1-${cardId}" placeholder="① 工程 (例: 取替前 消火器)" oninput="saveData()">
               <input type="text" id="t2-${cardId}" placeholder="② 設置場所 (例: 1階 エントランス)" oninput="saveData()">
-              <input type="text" id="t3-${cardId}" placeholder="③ 内容・結果 (例: 10型粉末 良好)" oninput="saveData()">
+              <input type="text" id="t3-${cardId}" placeholder="③ 内容・結果 (例: 誘導灯C級　)" oninput="saveData()">
             </div>
           </div>
         `;
