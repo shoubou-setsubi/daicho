@@ -456,7 +456,7 @@
     <div class="nav-title">📷 消防用設備 <span>写真台帳 Pro</span></div>
     <div class="nav-buttons">
       <button class="btn" onclick="addPage()">＋ ページ追加</button>
-      <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力</button>
+      <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力・共有</button>
       <button class="btn btn-indigo" onclick="triggerImportFile()">📥 読込</button>
       <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importDataFile(event)">
       <button class="btn btn-amber" onclick="clearAllData()">🗑 リセット</button>
@@ -624,8 +624,8 @@
       }
     }
 
-    /* ★ データ出力（スマホ→PCへのデータ受け渡し用） ★ */
-    function exportDataFile() {
+    /* ★ 強化版：データ出力・共有（スマホでメール共有メニューが起動） ★ */
+    async function exportDataFile() {
       saveData();
       const raw = localStorage.getItem('fire_report_pro_data');
       if (!raw) {
@@ -635,8 +635,28 @@
 
       const bName = document.getElementById('buildingName').value || '写真台帳';
       const fileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
-
       const blob = new Blob([raw], { type: 'application/json' });
+      const file = new File([blob], fileName, { type: 'application/json' });
+
+      // スマホで共有機能（Web Share API）に対応している場合は、メールやLINEのアプリ一覧を開く
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: `【写真台帳データ】${bName}`,
+            text: `現場からの写真台帳データです。（${bName}）\nPCのアプリで「読込」をして印刷・調整してください。`,
+            files: [file]
+          });
+          return; // 共有メニューが開いて正常に完了した場合
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.warn('共有処理をスキップし、ファイル保存に切り替えます:', err);
+          } else {
+            return; // ユーザーがキャンセルした場合
+          }
+        }
+      }
+
+      // PC等で共有API非対応の場合は、通常のファイルダウンロード
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -647,7 +667,7 @@
       URL.revokeObjectURL(url);
     }
 
-    /* ★ データ読込（PC側でデータ復元） ★ */
+    /* データ読込（PC側でデータ復元） */
     function triggerImportFile() {
       document.getElementById('importFileInput').click();
     }
@@ -660,7 +680,7 @@
       reader.onload = function(e) {
         try {
           const jsonText = e.target.result;
-          JSON.parse(jsonText); // バリデーションチェック
+          JSON.parse(jsonText);
           localStorage.setItem('fire_report_pro_data', jsonText);
           alert('データを正常に読み込みました！');
           location.reload();
@@ -1041,9 +1061,6 @@
       imgEl.style.display = 'none';
       imgEl.setAttribute('data-rotate', '0');
       imgEl.style.transform = 'rotate(0deg)';
-
-      btnGroup.style.display = 'flex';
-      overlay.style.display = 'none';
 
       document.getElementById(`input-cam-${cardId}`).value = '';
       document.getElementById(`input-lib-${cardId}`).value = '';
