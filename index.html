@@ -3,118 +3,195 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>消防用設備等 写真台帳作成 Pro</title>
+  <title>消防用設備 写真台帳作成 Pro</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: #f1f5f9;
-      color: #1e293b;
-      padding-bottom: 90px;
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.12);
     }
 
-    /* ヘッダー・操作ナビ */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      padding-bottom: 90px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ヘッダー */
     .nav-bar {
       position: sticky;
       top: 0;
       z-index: 100;
-      background-color: #0f172a;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       color: #fff;
-      padding: 10px 14px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      padding: 12px 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
+      gap: 10px;
+    }
+    .nav-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
       gap: 8px;
     }
-    .nav-title { font-size: 15px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-    .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-title span {
+      background: linear-gradient(135deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .nav-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
 
     .btn {
-      background-color: #2563eb;
+      background-color: #334155;
       color: #fff;
-      border: none;
-      padding: 7px 12px;
-      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
     }
-    .btn:active { transform: scale(0.97); }
-    .btn-emerald { background-color: #059669; }
-    .btn-slate { background-color: #475569; }
-    .btn-amber { background-color: #d97706; }
-    .btn-rose { background-color: #e11d48; }
+    .btn:active { transform: translateY(1px); }
+    .btn-emerald {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      border: none;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    }
+    .btn-emerald:hover { opacity: 0.95; box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35); }
+    .btn-amber { background-color: #d97706; border: none; }
+    .btn-rose { background-color: #e11d48; border: none; }
 
     /* コンテナ */
-    .container { max-width: 850px; margin: 16px auto; padding: 0 10px; }
+    .container { max-width: 880px; margin: 20px auto; padding: 0 14px; }
 
     /* 基本情報入力パネル */
     .meta-panel {
-      background: #fff;
-      padding: 14px;
-      border-radius: 10px;
-      margin-bottom: 14px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      background: var(--card-bg);
+      padding: 18px 20px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 18px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
     }
-    .input-field { display: flex; flex-direction: column; gap: 4px; }
-    .input-field label { font-size: 11px; font-weight: bold; color: #475569; }
+    .input-field { display: flex; flex-direction: column; gap: 6px; }
+    .input-field label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
     .input-field input, .input-field select {
-      padding: 8px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
+      padding: 9px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
       font-size: 13px;
+      background-color: #f8fafc;
+      color: var(--text-main);
+      transition: all 0.15s ease;
+    }
+    .input-field input:focus, .input-field select:focus {
+      outline: none;
       background-color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    /* 定型文クイック入力パネル */
+    /* 定型文パレット */
     .quick-tags-panel {
-      background: #fff;
-      padding: 12px 14px;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      background: var(--card-bg);
+      padding: 16px 20px;
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .quick-tags-header {
-      font-size: 11px;
-      font-weight: bold;
-      color: #64748b;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .quick-section { display: flex; flex-direction: column; gap: 4px; }
-    .quick-section-label { font-size: 10px; font-weight: bold; color: #94a3b8; letter-spacing: 0.5px; }
+    .quick-section { display: flex; flex-direction: column; gap: 6px; }
+    .quick-section-label { font-size: 10px; font-weight: 700; color: #94a3b8; letter-spacing: 0.8px; text-transform: uppercase; }
     .quick-tags-group { display: flex; flex-wrap: wrap; gap: 6px; }
 
     .tag-chip {
       background-color: #f1f5f9;
       border: 1px solid #cbd5e1;
       color: #334155;
-      padding: 5px 10px;
-      border-radius: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       user-select: none;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .tag-chip:active { background-color: #e2e8f0; }
+    .tag-chip:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+    .tag-chip:active { transform: translateY(0); }
 
-    /* タグカラー */
-    .tag-chip.type-process { background-color: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
-    .tag-chip.type-equipment { background-color: #f3e8ff; color: #6b21a8; border-color: #d8b4fe; }
-    .tag-chip.result-ok { background-color: #dcfce7; color: #166534; border-color: #86efac; }
-    .tag-chip.result-ng { background-color: #ffe4e6; color: #9f1239; border-color: #fca5a5; }
+    .tag-chip.type-process { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .tag-chip.type-equipment { background-color: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
+    .tag-chip.result-ok { background-color: #f0fdf4; color: #15803d; border-color: #bbf7d0; }
+    .tag-chip.result-ng { background-color: #fff1f2; color: #be123c; border-color: #fecdd3; }
+    .tag-chip.type-custom { background-color: #fef3c7; color: #b45309; border-color: #fde68a; }
+
+    .tag-del-btn {
+      font-size: 10px;
+      color: #94a3b8;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+    }
+    .tag-del-btn:hover { background-color: rgba(0,0,0,0.1); color: #dc2626; }
+
+    .add-tag-btn {
+      background-color: #f8fafc;
+      border: 1px dashed #94a3b8;
+      color: #475569;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .add-tag-btn:hover { background-color: #e2e8f0; }
 
     /* A4台帳シート */
     .page {
@@ -122,24 +199,25 @@
       width: 100%;
       max-width: 210mm;
       min-height: 297mm;
-      margin: 0 auto 24px auto;
-      padding: 12mm 10mm;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      border-radius: 4px;
+      margin: 0 auto 28px auto;
+      padding: 14mm 12mm;
+      box-shadow: var(--shadow-lg);
+      border-radius: 8px;
       position: relative;
       box-sizing: border-box;
+      border: 1px solid #e2e8f0;
     }
 
     .page-header {
       border-bottom: 2px solid #0f172a;
-      padding-bottom: 6px;
-      margin-bottom: 12px;
+      padding-bottom: 8px;
+      margin-bottom: 14px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
     }
-    .page-title { font-size: 18px; font-weight: bold; color: #0f172a; letter-spacing: 1px; }
-    .page-meta { font-size: 11px; color: #334155; text-align: right; line-height: 1.4; }
+    .page-title { font-size: 20px; font-weight: 800; color: #0f172a; letter-spacing: 1.5px; }
+    .page-meta { font-size: 11px; color: #475569; text-align: right; line-height: 1.5; font-weight: 500; }
 
     /* グリッドレイアウト */
     .photo-grid { display: grid; gap: 6mm 6mm; }
@@ -151,26 +229,28 @@
     .grid-8 { grid-template-columns: 1fr 1fr; }
 
     .photo-card {
-      border: 1px solid #cbd5e1;
-      border-radius: 4px;
-      padding: 6px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 8px;
       background: #fafafa;
       display: flex;
       flex-direction: column;
       gap: 6px;
       position: relative;
+      transition: border-color 0.2s;
     }
 
     .photo-box {
       width: 100%;
-      background: #e2e8f0;
-      border: 1px dashed #94a3b8;
-      border-radius: 4px;
+      background: #f1f5f9;
+      border: 2px dashed #cbd5e1;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow: hidden;
+      transition: all 0.2s ease;
     }
     .grid-1 .photo-box { height: 450px; }
     .grid-2 .photo-box { height: 260px; }
@@ -187,64 +267,74 @@
       transition: transform 0.2s;
     }
 
-    .photo-controls { display: flex; gap: 6px; z-index: 2; }
+    .photo-controls { display: flex; gap: 8px; z-index: 2; }
     .photo-btn {
-      background: rgba(255,255,255,0.95);
-      border: 1px solid #94a3b8;
-      padding: 6px 10px;
-      border-radius: 4px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      padding: 7px 14px;
+      border-radius: 6px;
       font-size: 12px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
-      color: #1e293b;
+      color: #334155;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 0.15s ease;
     }
+    .photo-btn:hover { background: #f8fafc; border-color: #94a3b8; }
 
     .photo-overlay-actions {
       position: absolute;
-      top: 4px;
-      right: 4px;
+      top: 6px;
+      right: 6px;
       display: none;
       gap: 4px;
       z-index: 3;
     }
     .overlay-btn {
-      background: rgba(15, 23, 42, 0.75);
+      background: rgba(15, 23, 42, 0.82);
+      backdrop-filter: blur(4px);
       color: #fff;
       border: none;
-      padding: 4px 8px;
+      padding: 5px 10px;
       border-radius: 4px;
       font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
+      transition: background 0.15s;
     }
-    .overlay-btn-save { background: rgba(5, 150, 105, 0.85); }
-    .overlay-btn-del { background: rgba(225, 29, 72, 0.85); }
+    .overlay-btn-save { background: rgba(5, 150, 105, 0.9); }
+    .overlay-btn-del { background: rgba(225, 29, 72, 0.9); }
 
     .file-input { display: none; }
 
     /* キャプション入力欄 */
-    .caption-group { display: flex; flex-direction: column; gap: 3px; }
+    .caption-group { display: flex; flex-direction: column; gap: 4px; }
     .caption-group input {
       width: 100%;
-      padding: 4px 6px;
+      padding: 5px 8px;
       font-size: 11px;
       border: 1px solid #cbd5e1;
-      border-radius: 3px;
+      border-radius: 4px;
       background: #fff;
+      color: #1e293b;
+      transition: all 0.15s;
     }
     .caption-group input:focus {
-      outline: 2px solid #2563eb;
-      border-color: transparent;
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
     }
 
     /* 自動保存ステータス */
     .save-status {
       font-size: 11px;
-      color: #64748b;
+      color: var(--text-muted);
+      font-weight: 500;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
     }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #22c55e; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
     /* 印刷・PDF出力用スタイル設定 */
     @page {
@@ -272,6 +362,7 @@
       .page {
         box-shadow: none !important;
         border-radius: 0 !important;
+        border: none !important;
         width: 210mm !important;
         height: 296mm !important;
         padding: 10mm 10mm !important;
@@ -308,9 +399,9 @@
 
   <!-- ナビゲーションバー -->
   <div class="nav-bar no-print">
-    <div class="nav-title">📷 消防用設備等 写真台帳 Pro</div>
+    <div class="nav-title">📷 消防用設備 <span>写真台帳 Pro</span></div>
     <div class="nav-buttons">
-      <button class="btn btn-slate" onclick="addPage()">＋ ページ追加</button>
+      <button class="btn" onclick="addPage()">＋ ページ追加</button>
       <button class="btn btn-amber" onclick="clearAllData()">🗑 リセット</button>
       <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷出力</button>
     </div>
@@ -337,10 +428,10 @@
       </div>
       <div class="input-field">
         <label>施工・点検者 / 会社名</label>
-        <input type="text" id="inspector" placeholder="例: 〇〇防災（担当: 田中）" oninput="saveData(); updateHeader();">
+        <input type="text" id="inspector" placeholder="例: 〇〇防災（担当: 山田）" oninput="saveData(); updateHeader();">
       </div>
       <div class="input-field">
-        <label>1ページの写真枚数（自由選択）</label>
+        <label>1ページの写真枚数</label>
         <select id="layoutMode" onchange="changeLayoutMode()">
           <option value="grid-1">1枚配置 (特大)</option>
           <option value="grid-2">2枚配置 (大)</option>
@@ -355,11 +446,12 @@
     <!-- 定型文パレット -->
     <div class="quick-tags-panel no-print">
       <div class="quick-tags-header">
-        <span>⚡ ワンタップ定型文（入力欄を選択してからタップ）</span>
+        <span>⚡ ワンタップ定型文パレット（タップで挿入 / ①番工程欄はドロップダウン直接選択も可能）</span>
       </div>
       
+      <!-- ① 工程・作業 -->
       <div class="quick-section">
-        <div class="quick-section-label">【工程・作業】</div>
+        <div class="quick-section-label">工程・作業（①番のドロップダウンリストに対応）</div>
         <div class="quick-tags-group">
           <span class="tag-chip type-process" onclick="insertTag('施工前')">施工前</span>
           <span class="tag-chip type-process" onclick="insertTag('施工中')">施工中</span>
@@ -370,12 +462,12 @@
           <span class="tag-chip type-process" onclick="insertTag('納入機器')">納入機器</span>
           <span class="tag-chip type-process" onclick="insertTag('撤去機器')">撤去機器</span>
           <span class="tag-chip type-process" onclick="insertTag('試験状況')">試験状況</span>
-          
         </div>
       </div>
 
+      <!-- ② 消防用設備 -->
       <div class="quick-section">
-        <div class="quick-section-label">【消防用設備】</div>
+        <div class="quick-section-label">消防用設備</div>
         <div class="quick-tags-group">
           <span class="tag-chip type-equipment" onclick="insertTag('消火器')">消火器</span>
           <span class="tag-chip type-equipment" onclick="insertTag('屋内消火栓設備')">屋内消火栓</span>
@@ -391,8 +483,9 @@
         </div>
       </div>
 
+      <!-- ③ 状況・判定 -->
       <div class="quick-section">
-        <div class="quick-section-label">【状況・判定】</div>
+        <div class="quick-section-label">状況・判定</div>
         <div class="quick-tags-group">
           <span class="tag-chip result-ok" onclick="insertTag('【良好】 作動確認済')">【良好】</span>
           <span class="tag-chip result-ok" onclick="insertTag('【良】 新品交換完了')">【交換済】</span>
@@ -401,10 +494,24 @@
           <span class="tag-chip result-ng" onclick="insertTag('【要交換】 期限切れ')">【要交換】</span>
         </div>
       </div>
+
+      <!-- ④ マイ定型文グループ -->
+      <div class="quick-section">
+        <div class="quick-section-label">マイ定型文（自分で自由に編集・追加）</div>
+        <div class="quick-tags-group" id="customTagsContainer">
+          <!-- カスタムタグが動的追加されます -->
+        </div>
+        <div style="margin-top: 4px;">
+          <button class="add-tag-btn" onclick="addNewCustomTag()">＋ 定型文を新規登録</button>
+        </div>
+      </div>
     </div>
 
+    <!-- ①番入力欄（工程）用データリスト -->
+    <datalist id="processList"></datalist>
+
     <!-- 自動保存表示 -->
-    <div class="save-status no-print" style="margin-bottom: 12px; justify-content: flex-end;">
+    <div class="save-status no-print" style="margin-bottom: 14px; justify-content: flex-end;">
       <span class="status-dot"></span>
       <span id="saveStatusText">自動保存が有効です</span>
     </div>
@@ -416,6 +523,7 @@
   <script>
     let pageCount = 0;
     let activeInput = null;
+    let customTags = [];
 
     window.onload = function() {
       const today = new Date().toISOString().split('T')[0];
@@ -427,18 +535,125 @@
         }
       });
 
+      loadCustomTags();
+
       if (!loadData()) {
         addPage();
       }
       updateHeader();
     };
 
-    /* ★ 印刷・PDF制御 (beforeprint / afterprint イベントによる完全自動制御) ★ */
+    /* ★ マイ定型文＆①番ドロップダウン同期機能 ★ */
+    function loadCustomTags() {
+      const raw = localStorage.getItem('fire_report_custom_tags');
+      if (raw) {
+        try { customTags = JSON.parse(raw); } catch (e) { customTags = []; }
+      }
+      renderCustomTags();
+    }
+
+    function renderCustomTags() {
+      const container = document.getElementById('customTagsContainer');
+      container.innerHTML = '';
+      customTags.forEach((tagText, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip type-custom';
+        chip.innerHTML = `${tagText} <span class="tag-del-btn" onclick="deleteCustomTag(event, ${idx})">✕</span>`;
+        chip.onclick = function(e) {
+          if (!e.target.classList.contains('tag-del-btn')) {
+            insertTag(tagText);
+          }
+        };
+        container.appendChild(chip);
+      });
+
+      updateProcessDatalist();
+    }
+
+    function updateProcessDatalist() {
+      const datalist = document.getElementById('processList');
+      if (!datalist) return;
+      
+      const defaultOptions = [
+        '（クリア）',
+        '施工前', '施工中', '施工後',
+        '取替前', '取替中', '取替後',
+        '納入機器', '撤去機器', '試験状況'
+      ];
+      
+      const allOptions = [...defaultOptions];
+      customTags.forEach(tag => {
+        if (!allOptions.includes(tag)) {
+          allOptions.push(tag);
+        }
+      });
+
+      datalist.innerHTML = allOptions.map(opt => `<option value="${opt}"></option>`).join('');
+    }
+
+    function addNewCustomTag() {
+      const text = prompt('追加したいオリジナルの定型文を入力してください:');
+      if (text && text.trim() !== '') {
+        customTags.push(text.trim());
+        localStorage.setItem('fire_report_custom_tags', JSON.stringify(customTags));
+        renderCustomTags();
+      }
+    }
+
+    function deleteCustomTag(e, idx) {
+      e.stopPropagation();
+      if (confirm(`定型文「${customTags[idx]}」を削除しますか？`)) {
+        customTags.splice(idx, 1);
+        localStorage.setItem('fire_report_custom_tags', JSON.stringify(customTags));
+        renderCustomTags();
+      }
+    }
+
+    /* ★ ①番入力欄（工程）のドロップダウン全項目表示＆即時上書きハンドラー ★ */
+    function handleProcessFocus(el) {
+      el.dataset.oldVal = el.value;
+      el.value = ''; // 既存文字によるフィルタリングを防ぎ、全項目を表示
+    }
+
+    function handleProcessInput(el) {
+      if (el.value === '（クリア）') {
+        el.value = '';
+        el.dataset.oldVal = '';
+        el.dataset.cleared = 'true';
+      } else {
+        el.dataset.oldVal = el.value;
+        delete el.dataset.cleared;
+      }
+      saveData();
+    }
+
+    function handleProcessBlur(el) {
+      if (el.value === '') {
+        if (el.dataset.cleared === 'true') {
+          el.value = '';
+        } else {
+          el.value = el.dataset.oldVal || ''; // キャンセル時は元の文字を復元
+        }
+      }
+      delete el.dataset.cleared;
+      saveData();
+    }
+
+    function getT1Value(cardId) {
+      const el = document.getElementById(`t1-${cardId}`);
+      if (!el) return '';
+      if (el.dataset.cleared === 'true') return '';
+      if (document.activeElement === el && el.value === '') {
+        return el.dataset.oldVal || '';
+      }
+      return el.value || '';
+    }
+
+    /* ★ 印刷・PDF制御 ★ */
     window.addEventListener('beforeprint', preparePrint);
     window.addEventListener('afterprint', restorePrint);
 
     function preparePrint() {
-      // 1. プレースホルダー（記入例ガイド）を退避して一時消去（多重実行ガード付き）
       document.querySelectorAll('input[placeholder]').forEach(input => {
         if (input.placeholder !== '') {
           input.dataset.tempPlaceholder = input.placeholder;
@@ -446,14 +661,16 @@
         }
       });
 
-      // 2. 「写真なし」かつ「文字入力なし」のカードを判定して非表示クラスを付与
       document.querySelectorAll('.photo-card').forEach(card => {
         const img = card.querySelector('img');
         const inputs = card.querySelectorAll('.caption-group input');
         
         const rawSrc = img ? (img.getAttribute('src') || '') : '';
         const hasImg = rawSrc.length > 0 && img.style.display !== 'none';
-        const hasText = Array.from(inputs).some(input => input.value.trim().length > 0);
+        const hasText = Array.from(inputs).some(input => {
+          const val = input.value ? input.value.trim() : '';
+          return val.length > 0 && val !== '（クリア）';
+        });
 
         if (!hasImg && !hasText) {
           card.classList.add('is-empty-card');
@@ -464,20 +681,17 @@
     }
 
     function restorePrint() {
-      // 1. プレースホルダーを元の文字列に完全復元
       document.querySelectorAll('input[data-temp-placeholder]').forEach(input => {
         input.placeholder = input.dataset.tempPlaceholder;
         delete input.dataset.tempPlaceholder;
       });
 
-      // 2. 画面表示用のカード非表示クラスを解除
       document.querySelectorAll('.photo-card.is-empty-card').forEach(card => {
         card.classList.remove('is-empty-card');
       });
     }
 
     function doPrint() {
-      // ブラウザ標準の印刷ダイアログを呼び出し（beforeprint / afterprint が自動的に安全に発火します）
       window.print();
     }
 
@@ -512,10 +726,16 @@
 
     function insertTag(text) {
       if (activeInput) {
-        if (activeInput.value) {
-          activeInput.value += ' ' + text;
-        } else {
+        if (activeInput.id && activeInput.id.startsWith('t1-')) {
           activeInput.value = text;
+          activeInput.dataset.oldVal = text;
+          delete activeInput.dataset.cleared;
+        } else {
+          if (activeInput.value) {
+            activeInput.value += ' ' + text;
+          } else {
+            activeInput.value = text;
+          }
         }
         saveData();
       } else {
@@ -560,9 +780,9 @@
               <input type="file" id="input-lib-${cardId}" class="file-input" accept="image/*" onchange="handleFileSelect(event, '${cardId}')">
             </div>
             <div class="caption-group">
-              <input type="text" id="t1-${cardId}" placeholder="① 工程 (例: 取替前 消火器)" oninput="saveData()">
+              <input type="text" id="t1-${cardId}" list="processList" placeholder="① 工程 (タップで選択・自由入力)" onfocus="handleProcessFocus(this)" oninput="handleProcessInput(this)" onblur="handleProcessBlur(this)">
               <input type="text" id="t2-${cardId}" placeholder="② 設置場所 (例: 1階 エントランス)" oninput="saveData()">
-              <input type="text" id="t3-${cardId}" placeholder="③ 内容・結果 (例: 誘導灯C級　)" oninput="saveData()">
+              <input type="text" id="t3-${cardId}" placeholder="③ 内容・結果 (例: 10型粉末 良好)" oninput="saveData()">
             </div>
           </div>
         `;
@@ -579,7 +799,7 @@
         <div class="photo-grid ${mode}">
           ${cardsHtml}
         </div>
-        <div class="no-print" style="margin-top: 10px; text-align: right;">
+        <div class="no-print" style="margin-top: 12px; text-align: right;">
           ${pNum > 1 ? `<button class="btn btn-rose" onclick="removePage('page-${pNum}')">このページを削除</button>` : ''}
         </div>
       `;
@@ -711,7 +931,7 @@
             data.cards[cardId] = {
               imgSrc: imgEl.style.display !== 'none' && imgEl.src.startsWith('data:') ? imgEl.src : '',
               rotate: imgEl.getAttribute('data-rotate') || '0',
-              t1: document.getElementById(`t1-${cardId}`)?.value || '',
+              t1: getT1Value(cardId),
               t2: document.getElementById(`t2-${cardId}`)?.value || '',
               t3: document.getElementById(`t3-${cardId}`)?.value || ''
             };
@@ -753,7 +973,10 @@
         if (item.imgSrc) {
           setPhotoData(cardId, item.imgSrc, parseInt(item.rotate, 10));
         }
-        if (document.getElementById(`t1-${cardId}`)) document.getElementById(`t1-${cardId}`).value = item.t1;
+        if (document.getElementById(`t1-${cardId}`)) {
+          document.getElementById(`t1-${cardId}`).value = item.t1;
+          document.getElementById(`t1-${cardId}`).dataset.oldVal = item.t1;
+        }
         if (document.getElementById(`t2-${cardId}`)) document.getElementById(`t2-${cardId}`).value = item.t2;
         if (document.getElementById(`t3-${cardId}`)) document.getElementById(`t3-${cardId}`).value = item.t3;
       });
