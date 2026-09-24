@@ -750,7 +750,7 @@
       }
     }
 
-    /* データ出力・共有機能 */
+    /* ★ 改善版 データ出力・共有機能（名前選択・保存場所選択に対応） ★ */
     async function exportDataFile() {
       saveData();
       const raw = localStorage.getItem('fire_report_pro_data');
@@ -760,13 +760,40 @@
       }
 
       const bName = document.getElementById('buildingName').value || '写真台帳';
-      const fileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
-      
-      const blob = new Blob([raw], { type: 'text/plain;charset=utf-8' });
-      const file = new File([blob], fileName, { type: 'text/plain' });
+      const defaultFileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
 
-      const isAndroid = /Android/i.test(navigator.userAgent);
+      // 1. ファイル名入力ダイアログ
+      let fileName = prompt('保存するファイル名を入力してください:', defaultFileName);
+      if (!fileName) return; // キャンセル時は処理中断
 
+      if (!fileName.endsWith('.json') && !fileName.endsWith('.txt')) {
+        fileName += '.json';
+      }
+
+      const blob = new Blob([raw], { type: 'application/json;charset=utf-8' });
+
+      // 2. PC（Chrome / Edgeなど）：標準の「名前を付けて保存」ウィンドウを開いて場所指定
+      if ('showSaveFilePicker' in window) {
+        try {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{
+              description: 'JSON データファイル',
+              accept: { 'application/json': ['.json'] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return; // キャンセル時は何もしない
+          console.warn('ファイル選択ダイアログの呼出に失敗したため、他の方法へ切り替えます:', err);
+        }
+      }
+
+      // 3. スマホ（iOS / Android）：共有メニュー起動（LINE送信やファイルアプリ保存が可能）
+      const file = new File([blob], fileName, { type: 'application/json' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
@@ -776,14 +803,11 @@
           });
           return;
         } catch (err) {
-          if (err.name !== 'AbortError') {
-            console.warn('共有メニューの呼出に失敗したためファイルダウンロードへ切り替えます:', err);
-          } else {
-            return;
-          }
+          if (err.name === 'AbortError') return;
         }
       }
 
+      // 4. 上記非対応環境でのフォールバック（ブラウザ標準ダウンロード）
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -792,12 +816,6 @@
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-
-      if (isAndroid) {
-        setTimeout(() => {
-          alert(`【保存完了】\nデータファイル「${fileName}」を端末のダウンロードフォルダへ保存しました！\n\n【次の手順】\nLINEやメールを開き、ダウンロードフォルダ内のファイルを選んで送信してください。`);
-        }, 300);
-      }
     }
 
     /* データ読込（PC側でデータ復元） */
@@ -1016,7 +1034,7 @@
       const inspector = document.getElementById('inspector').value;
       const inspectorStr = inspector ? `担当: ${inspector}` : '';
 
-      // 作業日と担当者の文字列を結合（どちらかが空欄でも綺麗につながる）
+      // 作業日と担当者の文字列を結合
       const subLineStr = [dateStr, inspectorStr].filter(Boolean).join(' ');
 
       document.querySelectorAll('.display-building').forEach(el => el.textContent = bName);
