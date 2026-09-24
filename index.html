@@ -26,7 +26,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: var(--bg-main);
       color: var(--text-main);
-      padding-bottom: 120px; /* 下部フローティングバー用の余白 */
+      padding-bottom: 120px;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -60,31 +60,29 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; justify-content: space-between; }
+    .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
     @media (min-width: 600px) {
-      .nav-buttons { width: auto; justify-content: flex-end; }
+      .nav-buttons { width: auto; }
     }
 
     .btn {
       background-color: #334155;
       color: #fff;
       border: 1px solid rgba(255,255,255,0.15);
-      padding: 9px 14px;
+      padding: 8px 12px;
       border-radius: var(--radius-sm);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
       transition: all 0.2s ease;
       box-shadow: var(--shadow-sm);
-      min-height: 40px;
-      flex: 1;
+      min-height: 38px;
       text-align: center;
     }
-    @media (min-width: 600px) { .btn { flex: none; } }
     .btn:active { transform: translateY(1px); opacity: 0.9; }
     .btn-emerald {
       background: linear-gradient(135deg, #059669 0%, #10b981 100%);
@@ -93,6 +91,7 @@
     }
     .btn-amber { background-color: #d97706; border: none; }
     .btn-rose { background-color: #e11d48; border: none; }
+    .btn-indigo { background-color: #4f46e5; border: none; }
 
     /* コンテナ */
     .container { max-width: 880px; margin: 12px auto; padding: 0 10px; }
@@ -115,7 +114,7 @@
       padding: 10px 12px;
       border: 1px solid var(--border-color);
       border-radius: var(--radius-sm);
-      font-size: 14px; /* iPhone自動ズーム防止サイズ */
+      font-size: 14px;
       background-color: #f8fafc;
       color: var(--text-main);
       min-height: 42px;
@@ -206,7 +205,7 @@
       min-height: 36px;
     }
 
-    /* ★ スマホ用画面下部フローティング定型文バー ★ */
+    /* スマホ用画面下部フローティング定型文バー */
     .mobile-float-bar {
       position: fixed;
       bottom: 0;
@@ -321,7 +320,6 @@
       display: none;
     }
 
-    /* スマホで押しやすい大きめ撮影・選択ボタン */
     .photo-controls { display: flex; gap: 8px; z-index: 2; width: 90%; justify-content: center; }
     .photo-btn {
       background: #ffffff;
@@ -366,12 +364,11 @@
 
     .file-input { display: none; }
 
-    /* キャプション入力欄 */
     .caption-group { display: flex; flex-direction: column; gap: 5px; }
     .caption-group input {
       width: 100%;
       padding: 7px 10px;
-      font-size: 13px; /* iOS自動ズーム防止 */
+      font-size: 13px;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
       background: #fff;
@@ -384,7 +381,6 @@
       box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
     }
 
-    /* 自動保存ステータス */
     .save-status {
       font-size: 11px;
       color: var(--text-muted);
@@ -395,7 +391,7 @@
     }
     .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
-    /* 印刷・PDF出力用スタイル設定 */
+    /* 印刷・PDF出力用スタイル */
     @page {
       size: A4 portrait;
       margin: 0;
@@ -447,7 +443,6 @@
         background: transparent !important;
       }
 
-      /* 印刷時：未使用枠を完全に消去して詰める */
       .photo-card.is-empty-card {
         display: none !important;
       }
@@ -461,6 +456,9 @@
     <div class="nav-title">📷 消防用設備 <span>写真台帳 Pro</span></div>
     <div class="nav-buttons">
       <button class="btn" onclick="addPage()">＋ ページ追加</button>
+      <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力</button>
+      <button class="btn btn-indigo" onclick="triggerImportFile()">📥 読込</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importDataFile(event)">
       <button class="btn btn-amber" onclick="clearAllData()">🗑 リセット</button>
       <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷</button>
     </div>
@@ -502,7 +500,7 @@
       </div>
     </div>
 
-    <!-- 上部定型文パレット（タップで開閉可能） -->
+    <!-- 上部定型文パレット（折りたたみ可能） -->
     <div class="quick-tags-panel no-print">
       <div class="quick-tags-header" onclick="toggleTagsBody()">
         <span>⚡ ワンタップ定型文パレット</span>
@@ -512,7 +510,7 @@
       <div class="quick-tags-body" id="quickTagsBody">
         <!-- ① 工程・作業 -->
         <div class="quick-section">
-          <div class="quick-section-label">工程・作業（①番のドロップダウンに対応）</div>
+          <div class="quick-section-label">工程・作業</div>
           <div class="quick-tags-group">
             <span class="tag-chip type-process" onclick="insertTag('施工前')">施工前</span>
             <span class="tag-chip type-process" onclick="insertTag('施工中')">施工中</span>
@@ -569,9 +567,6 @@
       </div>
     </div>
 
-    <!-- ①番入力欄（工程）用データリスト -->
-    <datalist id="processList"></datalist>
-
     <!-- 自動保存表示 -->
     <div class="save-status no-print" style="margin-bottom: 12px; justify-content: flex-end;">
       <span class="status-dot"></span>
@@ -582,7 +577,7 @@
     <div id="pagesContainer"></div>
   </div>
 
-  <!-- ★ スマホ用画面下部フローティング定型文バー ★ -->
+  <!-- スマホ用画面下部フローティング定型文バー -->
   <div class="mobile-float-bar no-print" id="mobileFloatBar">
     <div class="mobile-float-title">
       <span id="floatBarCategory">⚡ 定型文をタップして挿入</span>
@@ -602,7 +597,6 @@
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('inspectDate').value = today;
 
-      // フォーカス監視（スマホ用フローティングバーの連動制御）
       document.addEventListener('focusin', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
           activeInput = e.target;
@@ -630,7 +624,54 @@
       }
     }
 
-    /* ★ スマホ下部フローティングバーの動的生成 ★ */
+    /* ★ データ出力（スマホ→PCへのデータ受け渡し用） ★ */
+    function exportDataFile() {
+      saveData();
+      const raw = localStorage.getItem('fire_report_pro_data');
+      if (!raw) {
+        alert('保存するデータがありません。');
+        return;
+      }
+
+      const bName = document.getElementById('buildingName').value || '写真台帳';
+      const fileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
+
+      const blob = new Blob([raw], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* ★ データ読込（PC側でデータ復元） ★ */
+    function triggerImportFile() {
+      document.getElementById('importFileInput').click();
+    }
+
+    function importDataFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const jsonText = e.target.result;
+          JSON.parse(jsonText); // バリデーションチェック
+          localStorage.setItem('fire_report_pro_data', jsonText);
+          alert('データを正常に読み込みました！');
+          location.reload();
+        } catch (err) {
+          alert('ファイルの読み込みに失敗しました。正しいJSONファイルを選択してください。');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* スマホ下部フローティングバーの動的生成 */
     function showFloatBarForInput(inputEl) {
       const floatBar = document.getElementById('mobileFloatBar');
       const chipsContainer = document.getElementById('mobileFloatChips');
@@ -645,7 +686,7 @@
       let categoryName = '';
 
       if (inputEl.id.startsWith('t1-')) {
-        categoryName = '【① 工程】 タップで上書き';
+        categoryName = '【① 工程】 タップで即時置換';
         tags = [
           { text: '施工前', class: 'type-process' },
           { text: '施工中', class: 'type-process' },
@@ -658,7 +699,7 @@
           { text: '試験状況', class: 'type-process' }
         ];
       } else if (inputEl.id.startsWith('t2-')) {
-        categoryName = '【② 設備】 タップで追加';
+        categoryName = '【② 設備】 タップで文字追加';
         tags = [
           { text: '消火器', class: 'type-equipment' },
           { text: '屋内消火栓', class: 'type-equipment' },
@@ -670,7 +711,7 @@
           { text: 'SP設備', class: 'type-equipment' }
         ];
       } else if (inputEl.id.startsWith('t3-')) {
-        categoryName = '【③ 判定】 タップで追加';
+        categoryName = '【③ 判定】 タップで文字追加';
         tags = [
           { text: '【良好】', class: 'result-ok' },
           { text: '作動確認済', class: 'result-ok' },
@@ -681,7 +722,6 @@
         ];
       }
 
-      // マイ定型文も最後に追加
       customTags.forEach(ct => {
         tags.push({ text: ct, class: 'type-custom' });
       });
@@ -693,7 +733,7 @@
         chip.className = `tag-chip ${t.class}`;
         chip.textContent = t.text;
         chip.onmousedown = function(e) {
-          e.preventDefault(); // フォーカス外れを防止
+          e.preventDefault();
           insertTag(t.text);
         };
         chipsContainer.appendChild(chip);
@@ -706,7 +746,7 @@
       document.getElementById('mobileFloatBar').classList.remove('is-visible');
     }
 
-    /* ★ マイ定型文＆①番ドロップダウン同期機能 ★ */
+    /* マイ定型文機能 */
     function loadCustomTags() {
       const raw = localStorage.getItem('fire_report_custom_tags');
       if (raw) {
@@ -729,29 +769,6 @@
         };
         container.appendChild(chip);
       });
-
-      updateProcessDatalist();
-    }
-
-    function updateProcessDatalist() {
-      const datalist = document.getElementById('processList');
-      if (!datalist) return;
-      
-      const defaultOptions = [
-        '（クリア）',
-        '施工前', '施工中', '施工後',
-        '取替前', '取替中', '取替後',
-        '納入機器', '撤去機器', '試験状況'
-      ];
-      
-      const allOptions = [...defaultOptions];
-      customTags.forEach(tag => {
-        if (!allOptions.includes(tag)) {
-          allOptions.push(tag);
-        }
-      });
-
-      datalist.innerHTML = allOptions.map(opt => `<option value="${opt}"></option>`).join('');
     }
 
     function addNewCustomTag() {
@@ -772,47 +789,25 @@
       }
     }
 
-    /* ★ ①番入力欄（工程）のドロップダウン全項目表示＆即時上書きハンドラー ★ */
-    function handleProcessFocus(el) {
-      el.dataset.oldVal = el.value;
-      el.value = ''; // 既存文字によるフィルタリングを防ぎ、全項目を表示
-    }
-
-    function handleProcessInput(el) {
-      if (el.value === '（クリア）') {
-        el.value = '';
-        el.dataset.oldVal = '';
-        el.dataset.cleared = 'true';
-      } else {
-        el.dataset.oldVal = el.value;
-        delete el.dataset.cleared;
-      }
-      saveData();
-    }
-
-    function handleProcessBlur(el) {
-      if (el.value === '') {
-        if (el.dataset.cleared === 'true') {
-          el.value = '';
+    /* 定型文の挿入・上書きロジック */
+    function insertTag(text) {
+      if (activeInput) {
+        if (activeInput.id && activeInput.id.startsWith('t1-')) {
+          activeInput.value = text;
         } else {
-          el.value = el.dataset.oldVal || ''; // キャンセル時は元の文字を復元
+          if (activeInput.value) {
+            activeInput.value += ' ' + text;
+          } else {
+            activeInput.value = text;
+          }
         }
+        saveData();
+      } else {
+        alert('テキスト入力欄を選択してから定型文をタップしてください。');
       }
-      delete el.dataset.cleared;
-      saveData();
     }
 
-    function getT1Value(cardId) {
-      const el = document.getElementById(`t1-${cardId}`);
-      if (!el) return '';
-      if (el.dataset.cleared === 'true') return '';
-      if (document.activeElement === el && el.value === '') {
-        return el.dataset.oldVal || '';
-      }
-      return el.value || '';
-    }
-
-    /* ★ 印刷・PDF制御 ★ */
+    /* 印刷・PDF制御 */
     window.addEventListener('beforeprint', preparePrint);
     window.addEventListener('afterprint', restorePrint);
 
@@ -833,7 +828,7 @@
         const hasImg = rawSrc.length > 0 && img.style.display !== 'none';
         const hasText = Array.from(inputs).some(input => {
           const val = input.value ? input.value.trim() : '';
-          return val.length > 0 && val !== '（クリア）';
+          return val.length > 0;
         });
 
         if (!hasImg && !hasText) {
@@ -888,25 +883,6 @@
       rebuildAllPages();
     }
 
-    function insertTag(text) {
-      if (activeInput) {
-        if (activeInput.id && activeInput.id.startsWith('t1-')) {
-          activeInput.value = text;
-          activeInput.dataset.oldVal = text;
-          delete activeInput.dataset.cleared;
-        } else {
-          if (activeInput.value) {
-            activeInput.value += ' ' + text;
-          } else {
-            activeInput.value = text;
-          }
-        }
-        saveData();
-      } else {
-        alert('テキスト入力欄を選択してから定型文をタップしてください。');
-      }
-    }
-
     function addPage() {
       pageCount++;
       renderPageHtml(pageCount);
@@ -944,7 +920,7 @@
               <input type="file" id="input-lib-${cardId}" class="file-input" accept="image/*" onchange="handleFileSelect(event, '${cardId}')">
             </div>
             <div class="caption-group">
-              <input type="text" id="t1-${cardId}" list="processList" placeholder="① 工程 (タップで選択・自由入力)" onfocus="handleProcessFocus(this)" oninput="handleProcessInput(this)" onblur="handleProcessBlur(this)">
+              <input type="text" id="t1-${cardId}" placeholder="① 工程 (例: 施工前)" oninput="saveData()">
               <input type="text" id="t2-${cardId}" placeholder="② 設置場所 (例: 1階 エントランス)" oninput="saveData()">
               <input type="text" id="t3-${cardId}" placeholder="③ 内容・結果 (例: 10型粉末 良好)" oninput="saveData()">
             </div>
@@ -1095,7 +1071,7 @@
             data.cards[cardId] = {
               imgSrc: imgEl.style.display !== 'none' && imgEl.src.startsWith('data:') ? imgEl.src : '',
               rotate: imgEl.getAttribute('data-rotate') || '0',
-              t1: getT1Value(cardId),
+              t1: document.getElementById(`t1-${cardId}`)?.value || '',
               t2: document.getElementById(`t2-${cardId}`)?.value || '',
               t3: document.getElementById(`t3-${cardId}`)?.value || ''
             };
@@ -1137,10 +1113,7 @@
         if (item.imgSrc) {
           setPhotoData(cardId, item.imgSrc, parseInt(item.rotate, 10));
         }
-        if (document.getElementById(`t1-${cardId}`)) {
-          document.getElementById(`t1-${cardId}`).value = item.t1;
-          document.getElementById(`t1-${cardId}`).dataset.oldVal = item.t1;
-        }
+        if (document.getElementById(`t1-${cardId}`)) document.getElementById(`t1-${cardId}`).value = item.t1;
         if (document.getElementById(`t2-${cardId}`)) document.getElementById(`t2-${cardId}`).value = item.t2;
         if (document.getElementById(`t3-${cardId}`)) document.getElementById(`t3-${cardId}`).value = item.t3;
       });
