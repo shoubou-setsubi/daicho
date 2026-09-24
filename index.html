@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>消防用設備 写真台帳作成 Pro</title>
+  
+  <!-- Firebase SDK (無料バックアップストレージ) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --primary: #2563eb;
@@ -61,9 +66,7 @@
       -webkit-text-fill-color: transparent;
     }
     .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; justify-content: flex-end; }
-    @media (min-width: 600px) {
-      .nav-buttons { width: auto; }
-    }
+    @media (min-width: 600px) { .nav-buttons { width: auto; } }
 
     .btn {
       background-color: #334155;
@@ -84,17 +87,39 @@
       text-align: center;
     }
     .btn:active { transform: translateY(1px); opacity: 0.9; }
-    .btn-emerald {
-      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-      border: none;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
-    }
+    .btn-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
     .btn-amber { background-color: #d97706; border: none; }
     .btn-rose { background-color: #e11d48; border: none; }
     .btn-indigo { background-color: #4f46e5; border: none; }
 
     /* コンテナ */
     .container { max-width: 880px; margin: 12px auto; padding: 0 10px; }
+
+    /* スマホ↔PC引き継ぎパネル */
+    .sync-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 12px 14px;
+      border-radius: var(--radius-md);
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sync-header { font-size: 13px; font-weight: 700; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+    .sync-inputs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .sync-inputs input {
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      background: #f8fafc;
+      flex: 1;
+      min-width: 200px;
+      min-height: 38px;
+    }
+    .sync-inputs input:focus { outline: none; background: #fff; border-color: var(--primary); }
 
     /* 基本情報入力パネル */
     .meta-panel {
@@ -127,7 +152,7 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
-    /* 上部定型文パレット（折りたたみ可能） */
+    /* 上部定型文パレット */
     .quick-tags-panel {
       background: var(--card-bg);
       border-radius: var(--radius-md);
@@ -207,7 +232,7 @@
       min-height: 36px;
     }
 
-    /* スマホ用画面下部フローティング定型文バー */
+    /* スマホ用フローティングバー */
     .mobile-float-bar {
       position: fixed;
       bottom: 0;
@@ -226,30 +251,11 @@
       flex-direction: column;
       gap: 8px;
     }
-    .mobile-float-bar.is-visible {
-      transform: translateY(0);
-    }
-    .mobile-float-title {
-      font-size: 11px;
-      color: #94a3b8;
-      font-weight: 700;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .mobile-float-chips {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      -webkit-overflow-scrolling: touch;
-    }
+    .mobile-float-bar.is-visible { transform: translateY(0); }
+    .mobile-float-title { font-size: 11px; color: #94a3b8; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+    .mobile-float-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
     .mobile-float-chips::-webkit-scrollbar { display: none; }
-    .mobile-float-chips .tag-chip {
-      white-space: nowrap;
-      flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    }
+    .mobile-float-chips .tag-chip { white-space: nowrap; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
 
     /* A4台帳シート */
     .page {
@@ -265,7 +271,6 @@
       box-sizing: border-box;
       border: 1px solid #e2e8f0;
     }
-
     .page-header {
       border-bottom: 2px solid #0f172a;
       padding-bottom: 8px;
@@ -298,7 +303,6 @@
       position: relative;
     }
 
-    /* 横長4:3アスペクト比最適化枠 */
     .photo-box {
       width: 100%;
       aspect-ratio: 4 / 3;
@@ -311,14 +315,7 @@
       position: relative;
       overflow: hidden;
     }
-
-    .photo-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: none;
-      transition: transform 0.2s ease;
-    }
+    .photo-box img { width: 100%; height: 100%; object-fit: contain; display: none; transition: transform 0.2s ease; }
 
     .photo-controls { display: flex; gap: 8px; z-index: 2; width: 90%; justify-content: center; }
     .photo-btn {
@@ -376,11 +373,7 @@
       color: #1e293b;
       min-height: 36px;
     }
-    .caption-group input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
-    }
+    .caption-group input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18); }
 
     .save-status {
       font-size: 11px;
@@ -390,67 +383,26 @@
       align-items: center;
       gap: 6px;
     }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: #94a3b8; }
+    .status-dot.online { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
     /* 印刷・PDF出力用スタイル */
-    @page {
-      size: A4 portrait;
-      margin: 0;
-    }
-
+    @page { size: A4 portrait; margin: 0; }
     @media print {
-      html, body {
-        width: 210mm;
-        height: 100%;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #fff;
-      }
-      .no-print, .nav-bar, .meta-panel, .quick-tags-panel, .save-status, .mobile-float-bar {
-        display: none !important;
-      }
-      .container {
-        max-width: 100% !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
+      html, body { width: 210mm; height: 100%; margin: 0 !important; padding: 0 !important; background: #fff; }
+      .no-print, .nav-bar, .sync-panel, .meta-panel, .quick-tags-panel, .save-status, .mobile-float-bar { display: none !important; }
+      .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
       .page {
-        box-shadow: none !important;
-        border-radius: 0 !important;
-        border: none !important;
-        width: 210mm !important;
-        height: 296mm !important;
-        padding: 10mm 10mm !important;
-        margin: 0 !important;
-        page-break-after: always;
-        break-after: page;
-        page-break-inside: avoid;
-        break-inside: avoid;
-        box-sizing: border-box !important;
+        box-shadow: none !important; border-radius: 0 !important; border: none !important;
+        width: 210mm !important; height: 296mm !important; padding: 10mm 10mm !important; margin: 0 !important;
+        page-break-after: always; break-after: page; page-break-inside: avoid; break-inside: avoid; box-sizing: border-box !important;
       }
-      .page:last-child {
-        page-break-after: auto !important;
-        break-after: auto !important;
-      }
+      .page:last-child { page-break-after: auto !important; break-after: auto !important; }
       .photo-controls, .photo-overlay-actions { display: none !important; }
       .photo-box { border: none !important; background: transparent !important; }
-
-      .caption-group input {
-        border: none !important;
-        border-bottom: 1px solid #94a3b8 !important;
-        border-radius: 0 !important;
-        padding: 2px 0 !important;
-        background: transparent !important;
-      }
-
-      .photo-card.is-empty-card {
-        display: none !important;
-      }
-
-      .page-number-text {
-        color: #000 !important;
-      }
+      .caption-group input { border: none !important; border-bottom: 1px solid #94a3b8 !important; border-radius: 0 !important; padding: 2px 0 !important; background: transparent !important; }
+      .photo-card.is-empty-card { display: none !important; }
+      .page-number-text { color: #000 !important; }
     }
   </style>
 </head>
@@ -470,39 +422,47 @@
   </div>
 
   <div class="container">
+    
+    <!-- スマホ↔PCデータ引き継ぎ設定パネル -->
+    <div class="sync-panel no-print">
+      <div class="sync-header">
+        <span>📲 スマホ↔PC データ引き継ぎ（自分専用クラウド保存）</span>
+        <span id="syncStatusBadge"><span class="status-dot" id="syncDot"></span> <span id="syncStatusText">ローカル動作中</span></span>
+      </div>
+      <div class="sync-inputs">
+        <input type="text" id="syncUserKey" placeholder="🔑 自分専用キー (例: 山田_渋谷ビル)" oninput="saveSyncKey()">
+        <button class="btn btn-indigo" id="syncToggleBtn" onclick="toggleCloudSync()">☁️ クラウド連携ON</button>
+        <button class="btn" onclick="fetchLatestFromCloud()" id="fetchCloudBtn" style="display:none; background:#0284c7;">🔄 最新データを読み込む</button>
+      </div>
+    </div>
+
     <!-- 基本設定・台帳種類選択 -->
     <div class="meta-panel no-print">
       <div class="input-field">
         <label>台帳の種類（表題）</label>
         <select id="docType" onchange="updateDocTitle()">
-          <!-- マイ表題（カスタム） -->
-          <optgroup label="★ マイ表題（自作）" id="customDocTypeGroup">
-            <!-- 動的にマイ表題がここに入ります -->
-          </optgroup>
-          <!-- 基本表題 -->
+          <optgroup label="★ マイ表題（自作）" id="customDocTypeGroup"></optgroup>
           <optgroup label="基本表題">
             <option value="消防用設備 工事写真帳">消防用設備 工事写真帳</option>
             <option value="消防用設備 修繕写真帳">消防用設備 修繕写真帳</option>
             <option value="消防用設備 点検写真帳">消防用設備 点検写真帳</option>
           </optgroup>
-          <!-- 自動火災報知設備 -->
           <optgroup label="自動火災報知設備（自火報）">
             <option value="自動火災報知設備 工事写真帳">自動火災報知設備 工事写真帳</option>
             <option value="自動火災報知設備 修繕写真帳">自動火災報知設備 修繕写真帳</option>
             <option value="自動火災報知設備 点検写真帳">自動火災報知設備 点検写真帳</option>
           </optgroup>
-          <!-- 誘導灯設備 -->
           <optgroup label="誘導灯・非常照明設備">
             <option value="誘導灯設備 工事写真帳">誘導灯設備 工事写真帳</option>
             <option value="誘導灯設備 修繕写真帳">誘導灯設備 修繕写真帳</option>
             <option value="誘導灯設備 点検写真帳">誘導灯設備 点検写真帳</option>
             <option value="非常照明設備 修繕写真帳">非常照明設備 修繕写真帳</option>
           </optgroup>
-          <!-- 消火設備 -->
-          <optgroup label="消火器・屋内/屋外消火栓・SP設備">
+          <optgroup label="消火設備">
             <option value="消火器 交換写真帳">消火器 交換写真帳</option>
             <option value="消火器 点検写真帳">消火器 点検写真帳</option>
             <option value="屋内消火栓設備 工事写真帳">屋内消火栓設備 工事写真帳</option>
+
             <option value="屋内消火栓設備 修繕写真帳">屋内消火栓設備 修繕写真帳</option>
             <option value="屋内消火栓設備 点検写真帳">屋内消火栓設備 点検写真帳</option>
             <option value="屋外消火栓設備 工事写真帳">屋外消火栓設備 工事写真帳</option>
@@ -511,8 +471,7 @@
             <option value="スプリンクラー設備 工事写真帳">スプリンクラー設備 工事写真帳</option>
             <option value="スプリンクラー設備 修繕写真帳">スプリンクラー設備 修繕写真帳</option>
           </optgroup>
-          <!-- 避難・警報・その他 -->
-          <optgroup label="避難・警報・その他設備">
+          <optgroup label="避難・警報・その他">
             <option value="避難器具 工事写真帳">避難器具 工事写真帳</option>
             <option value="避難器具 修繕写真帳">避難器具 修繕写真帳</option>
             <option value="非常放送設備 工事写真帳">非常放送設備 工事写真帳</option>
@@ -547,15 +506,13 @@
       </div>
     </div>
 
-    <!-- 上部定型文パレット（折りたたみ可能） -->
+    <!-- 上部定型文パレット -->
     <div class="quick-tags-panel no-print">
       <div class="quick-tags-header" onclick="toggleTagsBody()">
         <span>⚡ ワンタップ定型文・表題管理パレット</span>
         <span id="tagsToggleIcon">▲ 閉じる</span>
       </div>
-      
       <div class="quick-tags-body" id="quickTagsBody">
-        <!-- ① 工程・作業 -->
         <div class="quick-section">
           <div class="quick-section-label">工程・作業</div>
           <div class="quick-tags-group">
@@ -570,8 +527,6 @@
             <span class="tag-chip type-process" onclick="insertTag('試験状況')">試験状況</span>
           </div>
         </div>
-
-        <!-- ② 消防用設備 -->
         <div class="quick-section">
           <div class="quick-section-label">消防用設備</div>
           <div class="quick-tags-group">
@@ -588,8 +543,6 @@
             <span class="tag-chip type-equipment" onclick="insertTag('非常放送設備')">非常放送</span>
           </div>
         </div>
-
-        <!-- ③ 状況・判定 -->
         <div class="quick-section">
           <div class="quick-section-label">状況・判定</div>
           <div class="quick-tags-group">
@@ -600,24 +553,16 @@
             <span class="tag-chip result-ng" onclick="insertTag('【要交換】 期限切れ')">【要交換】</span>
           </div>
         </div>
-
-        <!-- ④ マイ定型文グループ -->
         <div class="quick-section">
-          <div class="quick-section-label">マイ定型文（自分で自由に編集・追加）</div>
-          <div class="quick-tags-group" id="customTagsContainer">
-            <!-- カスタムタグが動的追加されます -->
-          </div>
+          <div class="quick-section-label">マイ定型文</div>
+          <div class="quick-tags-group" id="customTagsContainer"></div>
           <div style="margin-top: 4px;">
             <button class="add-tag-btn" onclick="addNewCustomTag()">＋ 定型文を新規登録</button>
           </div>
         </div>
-
-        <!-- ⑤ マイ表題（自作表題の管理） -->
         <div class="quick-section">
-          <div class="quick-section-label">マイ表題（自分で作成した「台帳の種類」）</div>
-          <div class="quick-tags-group" id="customDocTypesContainer">
-            <!-- カスタム表題チップが動的追加されます -->
-          </div>
+          <div class="quick-section-label">マイ表題</div>
+          <div class="quick-tags-group" id="customDocTypesContainer"></div>
           <div style="margin-top: 4px;">
             <button class="add-tag-btn" style="border-color:#0284c7; color:#0369a1; background:#f0f9ff;" onclick="addNewCustomDocType()">＋ 表題を新規登録</button>
           </div>
@@ -625,9 +570,9 @@
       </div>
     </div>
 
-    <!-- 自動保存表示 -->
+    <!-- 自動保存状態表示 -->
     <div class="save-status no-print" style="margin-bottom: 12px; justify-content: flex-end;">
-      <span class="status-dot"></span>
+      <span class="status-dot online"></span>
       <span id="saveStatusText">自動保存が有効です</span>
     </div>
 
@@ -635,15 +580,13 @@
     <div id="pagesContainer"></div>
   </div>
 
-  <!-- スマホ用画面下部フローティング定型文バー -->
+  <!-- スマホ用フローティングバー -->
   <div class="mobile-float-bar no-print" id="mobileFloatBar">
     <div class="mobile-float-title">
       <span id="floatBarCategory">⚡ 定型文をタップして挿入</span>
       <span style="cursor: pointer; padding: 2px 8px;" onclick="hideFloatBar()">✕ 閉じる</span>
     </div>
-    <div class="mobile-float-chips" id="mobileFloatChips">
-      <!-- 選択中の入力欄に応じたタグが動的セットされます -->
-    </div>
+    <div class="mobile-float-chips" id="mobileFloatChips"></div>
   </div>
 
   <script>
@@ -651,10 +594,24 @@
     let activeInput = null;
     let customTags = [];
     let customDocTypes = [];
+    
+    let isCloudEnabled = false;
+    let firebaseDb = null;
+    let userCloudRef = null;
+    let saveTimeout = null;
+
+    // Firebase無料枠設定（デフォルト設定）
+    const firebaseConfig = {
+      apiKey: "AIzaSyDummyKeyForInitialSetup12345",
+      authDomain: "fire-report-app.firebaseapp.com",
+      databaseURL: "https://fire-report-app-default-rtdb.firebaseio.com",
+      projectId: "fire-report-app",
+      storageBucket: "fire-report-app.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
 
     window.onload = function() {
-      // 日付は自動設定せず空欄スタート（空欄での作成・印刷を考慮）
-
       document.addEventListener('focusin', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
           activeInput = e.target;
@@ -665,10 +622,22 @@
       loadCustomDocTypes();
       loadCustomTags();
 
+      const savedKey = localStorage.getItem('fire_sync_user_key') || '';
+      document.getElementById('syncUserKey').value = savedKey;
+
       if (!loadData()) {
         addPage();
       }
       updateHeader();
+
+      // PC等でタブに戻った際に最新データを検知して自動読み込み
+      window.addEventListener('focus', () => {
+        if (isCloudEnabled) fetchLatestFromCloud(true);
+      });
+
+      if (savedKey) {
+        toggleCloudSync(true);
+      }
     };
 
     function toggleTagsBody() {
@@ -683,7 +652,66 @@
       }
     }
 
-    /* マイ表題（台帳の種類）の追加・管理機能 */
+    /* ☁️ 自分専用クラウド保存・引き継ぎロジック */
+    function toggleCloudSync(autoStart = false) {
+      const userKey = document.getElementById('syncUserKey').value.trim();
+
+      if (!userKey) {
+        if (!autoStart) alert('自分専用キー（例: 山田_渋谷ビル）を入力してください！');
+        return;
+      }
+
+      if (isCloudEnabled && !autoStart) {
+        isCloudEnabled = false;
+        document.getElementById('syncToggleBtn').textContent = '☁️ クラウド連携ON';
+        document.getElementById('syncToggleBtn').className = 'btn btn-indigo';
+        document.getElementById('syncStatusText').textContent = 'ローカル動作中';
+        document.getElementById('syncDot').className = 'status-dot';
+        document.getElementById('fetchCloudBtn').style.display = 'none';
+        return;
+      }
+
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        firebaseDb = firebase.database();
+        userCloudRef = firebaseDb.ref('personal_data/' + encodeURIComponent(userKey));
+
+        isCloudEnabled = true;
+        document.getElementById('syncToggleBtn').textContent = '⏹️ 連携OFF';
+        document.getElementById('syncToggleBtn').className = 'btn btn-rose';
+        document.getElementById('syncStatusText').textContent = '🟢 クラウド自動バックアップ中';
+        document.getElementById('syncDot').className = 'status-dot online';
+        document.getElementById('fetchCloudBtn').style.display = 'inline-flex';
+
+        fetchLatestFromCloud(true);
+
+      } catch (e) {
+        console.warn('クラウド初期化スキップ', e);
+      }
+    }
+
+    function saveSyncKey() {
+      localStorage.setItem('fire_sync_user_key', document.getElementById('syncUserKey').value);
+    }
+
+    function fetchLatestFromCloud(silent = false) {
+      if (!userCloudRef) return;
+
+      userCloudRef.once('value').then((snapshot) => {
+        const cloudData = snapshot.val();
+        if (cloudData && cloudData.appData) {
+          restoreCardsAndMeta(cloudData.appData);
+          if (!silent) alert('クラウドから最新データを読み込みました！');
+          document.getElementById('saveStatusText').textContent = `クラウド同期完了 (${new Date().toLocaleTimeString()})`;
+        } else {
+          if (!silent) alert('クラウド上に該当キーのデータがまだありません。');
+        }
+      });
+    }
+
+    /* マイ表題の管理 */
     function loadCustomDocTypes() {
       const raw = localStorage.getItem('fire_report_custom_doctypes');
       if (raw) {
@@ -725,7 +753,7 @@
     }
 
     function addNewCustomDocType() {
-      const text = prompt('追加したい「台帳の種類（表題）」を入力してください:\n(例: 総合点検 写真台帳、連結送水管 検査写真帳)');
+      const text = prompt('追加したい「台帳の種類（表題）」を入力してください:');
       if (text && text.trim() !== '') {
         const newTitle = text.trim();
         if (!customDocTypes.includes(newTitle)) {
@@ -750,7 +778,7 @@
       }
     }
 
-    /* ★ 改善版 データ出力・共有機能（名前選択・保存場所選択に対応） ★ */
+    /* データ出力・共有 */
     async function exportDataFile() {
       saveData();
       const raw = localStorage.getItem('fire_report_pro_data');
@@ -762,9 +790,8 @@
       const bName = document.getElementById('buildingName').value || '写真台帳';
       const defaultFileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
 
-      // 1. ファイル名入力ダイアログ
       let fileName = prompt('保存するファイル名を入力してください:', defaultFileName);
-      if (!fileName) return; // キャンセル時は処理中断
+      if (!fileName) return;
 
       if (!fileName.endsWith('.json') && !fileName.endsWith('.txt')) {
         fileName += '.json';
@@ -772,33 +799,27 @@
 
       const blob = new Blob([raw], { type: 'application/json;charset=utf-8' });
 
-      // 2. PC（Chrome / Edgeなど）：標準の「名前を付けて保存」ウィンドウを開いて場所指定
       if ('showSaveFilePicker' in window) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: fileName,
-            types: [{
-              description: 'JSON データファイル',
-              accept: { 'application/json': ['.json'] }
-            }]
+            types: [{ description: 'JSON データファイル', accept: { 'application/json': ['.json'] } }]
           });
           const writable = await handle.createWritable();
           await writable.write(blob);
           await writable.close();
           return;
         } catch (err) {
-          if (err.name === 'AbortError') return; // キャンセル時は何もしない
-          console.warn('ファイル選択ダイアログの呼出に失敗したため、他の方法へ切り替えます:', err);
+          if (err.name === 'AbortError') return;
         }
       }
 
-      // 3. スマホ（iOS / Android）：共有メニュー起動（LINE送信やファイルアプリ保存が可能）
       const file = new File([blob], fileName, { type: 'application/json' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             title: `【写真台帳データ】${bName}`,
-            text: `現場からの写真台帳データです。（${bName}）\nPCのアプリで「読込」をして印刷・調整してください。`,
+            text: `現場からの写真台帳データです。（${bName}）`,
             files: [file]
           });
           return;
@@ -807,7 +828,6 @@
         }
       }
 
-      // 4. 上記非対応環境でのフォールバック（ブラウザ標準ダウンロード）
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -818,7 +838,6 @@
       URL.revokeObjectURL(url);
     }
 
-    /* データ読込（PC側でデータ復元） */
     function triggerImportFile() {
       document.getElementById('importFileInput').click();
     }
@@ -836,13 +855,13 @@
           alert('データを正常に読み込みました！');
           location.reload();
         } catch (err) {
-          alert('ファイルの読み込みに失敗しました。正しく出力されたデータファイルを選択してください。');
+          alert('ファイルの読み込みに失敗しました。');
         }
       };
       reader.readAsText(file);
     }
 
-    /* スマホ下部フローティングバーの制御 */
+    /* スマホ下部フローティングバー */
     function showFloatBarForInput(inputEl) {
       const floatBar = document.getElementById('mobileFloatBar');
       const chipsContainer = document.getElementById('mobileFloatChips');
@@ -948,17 +967,12 @@
       }
     }
 
-    /* 定型文の挿入・上書きロジック */
     function insertTag(text) {
       if (activeInput) {
         if (activeInput.id && activeInput.id.startsWith('t1-')) {
           activeInput.value = text;
         } else {
-          if (activeInput.value) {
-            activeInput.value += ' ' + text;
-          } else {
-            activeInput.value = text;
-          }
+          activeInput.value = activeInput.value ? `${activeInput.value} ${text}` : text;
         }
         saveData();
       } else {
@@ -966,7 +980,7 @@
       }
     }
 
-    /* 印刷・PDF制御 */
+    /* 印刷制御 */
     window.addEventListener('beforeprint', preparePrint);
     window.addEventListener('afterprint', restorePrint);
 
@@ -985,10 +999,7 @@
         
         const rawSrc = img ? (img.getAttribute('src') || '') : '';
         const hasImg = rawSrc.length > 0 && img.style.display !== 'none';
-        const hasText = Array.from(inputs).some(input => {
-          const val = input.value ? input.value.trim() : '';
-          return val.length > 0;
-        });
+        const hasText = Array.from(inputs).some(input => (input.value ? input.value.trim() : '').length > 0);
 
         if (!hasImg && !hasText) {
           card.classList.add('is-empty-card');
@@ -1026,7 +1037,6 @@
       saveData();
     }
 
-    /* ★ 作業日・担当者の表示制御（作業日空欄時は「作業日: 」を消す） ★ */
     function updateHeader() {
       const bName = document.getElementById('buildingName').value || '（未入力）';
       const dVal = document.getElementById('inspectDate').value;
@@ -1034,7 +1044,6 @@
       const inspector = document.getElementById('inspector').value;
       const inspectorStr = inspector ? `担当: ${inspector}` : '';
 
-      // 作業日と担当者の文字列を結合
       const subLineStr = [dateStr, inspectorStr].filter(Boolean).join(' ');
 
       document.querySelectorAll('.display-building').forEach(el => el.textContent = bName);
@@ -1044,15 +1053,12 @@
       });
     }
 
-    /* 全ページのページ番号表示（1 / 2 ページ等）を更新 */
     function updatePageNumbers() {
       const pages = document.querySelectorAll('.page');
       const total = pages.length;
       pages.forEach((pageEl, index) => {
         const pageNumEl = pageEl.querySelector('.display-page-num');
-        if (pageNumEl) {
-          pageNumEl.textContent = `${index + 1} / ${total} ページ`;
-        }
+        if (pageNumEl) pageNumEl.textContent = `${index + 1} / ${total} ページ`;
       });
     }
 
@@ -1116,9 +1122,7 @@
             <div class="page-number-text display-page-num"></div>
           </div>
         </div>
-        <div class="photo-grid ${mode}">
-          ${cardsHtml}
-        </div>
+        <div class="photo-grid ${mode}">${cardsHtml}</div>
         <div class="no-print" style="margin-top: 12px; text-align: right;">
           ${pNum > 1 ? `<button class="btn btn-rose" onclick="removePage('page-${pNum}')">このページを削除</button>` : ''}
         </div>
@@ -1237,6 +1241,29 @@
     }
 
     function saveData() {
+      const data = getFullDataObject();
+
+      try {
+        localStorage.setItem('fire_report_pro_data', JSON.stringify(data));
+        document.getElementById('saveStatusText').textContent = '自動保存完了 (' + new Date().toLocaleTimeString() + ')';
+      } catch (e) {
+        console.warn('LocalStorage limit reached', e);
+      }
+
+      if (isCloudEnabled && userCloudRef) {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+          userCloudRef.set({
+            appData: data,
+            updatedAt: Date.now()
+          }).then(() => {
+            document.getElementById('saveStatusText').textContent = 'クラウド保存完了 (' + new Date().toLocaleTimeString() + ')';
+          });
+        }, 1000);
+      }
+    }
+
+    function getFullDataObject() {
       const data = {
         docType: document.getElementById('docType').value,
         buildingName: document.getElementById('buildingName').value,
@@ -1248,7 +1275,6 @@
       };
 
       const maxCards = getCardCountForMode(data.layoutMode);
-
       for (let p = 1; p <= pageCount; p++) {
         for (let c = 1; c <= maxCards; c++) {
           const cardId = `p${p}-c${c}`;
@@ -1264,13 +1290,7 @@
           }
         }
       }
-
-      try {
-        localStorage.setItem('fire_report_pro_data', JSON.stringify(data));
-        document.getElementById('saveStatusText').textContent = '自動保存済み (' + new Date().toLocaleTimeString() + ')';
-      } catch (e) {
-        console.warn('LocalStorage limit reached', e);
-      }
+      return data;
     }
 
     function rebuildAllPages() {
@@ -1287,28 +1307,38 @@
         renderPageHtml(pageCount);
       }
 
-      restoreCardsData(data.cards);
+      restoreCardsAndMeta(data);
+    }
+
+    function restoreCardsAndMeta(data) {
+      if (!data) return;
+
+      if (data.docType) document.getElementById('docType').value = data.docType;
+      if (data.buildingName) document.getElementById('buildingName').value = data.buildingName;
+      if (data.inspectDate) document.getElementById('inspectDate').value = data.inspectDate;
+      if (data.inspector) document.getElementById('inspector').value = data.inspector;
+      if (data.layoutMode) document.getElementById('layoutMode').value = data.layoutMode;
+
+      if (data.cards) {
+        Object.keys(data.cards).forEach(cardId => {
+          const item = data.cards[cardId];
+          if (item.imgSrc) {
+            setPhotoData(cardId, item.imgSrc, parseInt(item.rotate || '0', 10));
+            const imgEl = document.getElementById(`img-${cardId}`);
+            const deg = parseInt(item.rotate || '0', 10);
+            if (imgEl && (deg === 90 || deg === 270)) {
+              imgEl.style.transform = `rotate(${deg}deg) scale(0.75)`;
+            }
+          }
+          if (document.getElementById(`t1-${cardId}`)) document.getElementById(`t1-${cardId}`).value = item.t1;
+          if (document.getElementById(`t2-${cardId}`)) document.getElementById(`t2-${cardId}`).value = item.t2;
+          if (document.getElementById(`t3-${cardId}`)) document.getElementById(`t3-${cardId}`).value = item.t3;
+        });
+      }
+
       updateHeader();
       updatePageNumbers();
       updateDocTitle();
-    }
-
-    function restoreCardsData(cardsObj) {
-      if (!cardsObj) return;
-      Object.keys(cardsObj).forEach(cardId => {
-        const item = cardsObj[cardId];
-        if (item.imgSrc) {
-          setPhotoData(cardId, item.imgSrc, parseInt(item.rotate, 10));
-          const imgEl = document.getElementById(`img-${cardId}`);
-          const deg = parseInt(item.rotate, 10);
-          if (imgEl && (deg === 90 || deg === 270)) {
-            imgEl.style.transform = `rotate(${deg}deg) scale(0.75)`;
-          }
-        }
-        if (document.getElementById(`t1-${cardId}`)) document.getElementById(`t1-${cardId}`).value = item.t1;
-        if (document.getElementById(`t2-${cardId}`)) document.getElementById(`t2-${cardId}`).value = item.t2;
-        if (document.getElementById(`t3-${cardId}`)) document.getElementById(`t3-${cardId}`).value = item.t3;
-      });
     }
 
     function loadData() {
@@ -1317,21 +1347,6 @@
 
       try {
         const data = JSON.parse(raw);
-        if (data.docType) {
-          if (!document.querySelector(`#docType option[value="${data.docType}"]`)) {
-            if (!customDocTypes.includes(data.docType)) {
-              customDocTypes.push(data.docType);
-              localStorage.setItem('fire_report_custom_doctypes', JSON.stringify(customDocTypes));
-              renderCustomDocTypes();
-            }
-          }
-          document.getElementById('docType').value = data.docType;
-        }
-        document.getElementById('buildingName').value = data.buildingName || '';
-        document.getElementById('inspectDate').value = data.inspectDate || '';
-        document.getElementById('inspector').value = data.inspector || '';
-        if (data.layoutMode) document.getElementById('layoutMode').value = data.layoutMode;
-
         pageCount = 0;
         const targetPages = data.pageCount || 1;
         for (let p = 1; p <= targetPages; p++) {
@@ -1340,10 +1355,7 @@
         }
 
         setTimeout(() => {
-          restoreCardsData(data.cards);
-          updateHeader();
-          updatePageNumbers();
-          updateDocTitle();
+          restoreCardsAndMeta(data);
         }, 50);
 
         return true;
