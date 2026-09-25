@@ -27,6 +27,7 @@
       color: var(--text-main);
       padding-bottom: 120px;
       -webkit-font-smoothing: antialiased;
+      overflow-x: hidden; /* 横スクロールの発生を防止 */
     }
 
     /* ヘッダー */
@@ -223,7 +224,7 @@
     .mobile-float-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
     .mobile-float-chips .tag-chip { white-space: nowrap; flex-shrink: 0; }
 
-    /* A4台帳シート (画面表示用) */
+    /* A4台帳シート (PC表示用) */
     .page {
       background: #fff;
       width: 210mm;
@@ -254,7 +255,7 @@
     .page-meta { font-size: 10px; color: #475569; text-align: right; line-height: 1.3; }
     .page-number-text { font-size: 11px; font-weight: 700; color: #2563eb; }
 
-    /* グリッドレイアウトの設定 */
+    /* PC・大画面時のグリッド */
     .photo-grid {
       display: grid;
       gap: 16px;
@@ -270,7 +271,7 @@
     .grid-6 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
     .grid-8 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); }
 
-    /* ★外枠（ボーダー）を削除して透明背景にスッキリ変更 */
+    /* 外枠なし・すっきりカード */
     .photo-card {
       border: none;
       border-radius: 0;
@@ -293,7 +294,6 @@
       border-radius: 4px;
     }
 
-    /* 写真ボックスのデザイン（撮影前のグレー表示、写真追加時は枠なし） */
     .photo-box {
       width: 100%;
       flex: 1;
@@ -348,7 +348,6 @@
     .overlay-btn-del { background: rgba(225, 29, 72, 0.95); }
     .file-input { display: none; }
 
-    /* キャプション入力欄のデザイン（枠なし・スマートな下線デザイン） */
     .caption-group {
       display: flex;
       flex-direction: column;
@@ -390,7 +389,60 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: #94a3b8; }
     .status-dot.online { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
-    /* 🖨️ 印刷・PDF完全固定設定 */
+    /* 📱📱📱 スマホ表示最適化 (幅768px以下) 📱📱📱 */
+    @media screen and (max-width: 768px) {
+      .container { padding: 0 6px; }
+      
+      /* A4固定幅を解除し、画面幅一杯に収める */
+      .page {
+        width: 100% !important;
+        height: auto !important;
+        min-height: initial !important;
+        padding: 12px !important;
+        margin-bottom: 16px !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      }
+
+      /* 画面上では横持ちグリッドを解除し、垂直（1列）にカードを並べて横スクロールを防止 */
+      .photo-grid {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        gap: 20px !important;
+      }
+
+      .photo-card {
+        height: auto !important;
+        padding-bottom: 12px;
+        border-bottom: 1px dashed var(--border-color);
+      }
+      .photo-card:last-child {
+        border-bottom: none;
+      }
+
+      .photo-box {
+        width: 100% !important;
+        height: 220px !important;
+        max-height: none !important;
+        max-width: none !important;
+      }
+
+      .caption-group {
+        max-width: 100% !important;
+        gap: 6px !important;
+      }
+
+      .caption-group input {
+        font-size: 14px !important; /* スマホで押しやすく・読みやすく */
+        padding: 8px 4px !important;
+      }
+
+      .nav-bar { padding: 8px; }
+      .nav-buttons { width: 100%; justify-content: space-between; }
+      .btn { padding: 6px 10px; font-size: 11px; min-height: 36px; }
+    }
+
+    /* 🖨️ 印刷・PDF出力時は完全なA4サイズ・グリッド配置へ復元 */
     @page {
       size: A4 portrait;
       margin: 0;
@@ -404,6 +456,7 @@
         padding: 0 !important;
         background: #fff !important;
         -webkit-print-color-adjust: exact;
+        overflow: visible !important;
       }
       .no-print, .nav-bar, .meta-panel, .sidebar-overlay, .sidebar-panel, .save-status, .mobile-float-bar {
         display: none !important;
@@ -429,6 +482,8 @@
         break-after: page !important;
         box-sizing: border-box !important;
         overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
       }
 
       .page-header {
@@ -437,22 +492,31 @@
         margin-bottom: 8px !important;
       }
 
+      /* 印刷時は本来指定されているCSS Gridへ復元 */
       .photo-grid {
+        display: grid !important;
         gap: 12px !important;
         height: calc(297mm - 20mm - 38px) !important;
       }
+      .grid-1 { grid-template-columns: 1fr !important; grid-template-rows: 1fr !important; }
+      .grid-2 { grid-template-columns: 1fr !important; grid-template-rows: repeat(2, 1fr) !important; }
+      .grid-3 { grid-template-columns: 1fr !important; grid-template-rows: repeat(3, 1fr) !important; }
+      .grid-4 { grid-template-columns: 1fr 1fr !important; grid-template-rows: repeat(2, 1fr) !important; }
+      .grid-6 { grid-template-columns: 1fr 1fr !important; grid-template-rows: repeat(3, 1fr) !important; }
+      .grid-8 { grid-template-columns: 1fr 1fr !important; grid-template-rows: repeat(4, 1fr) !important; }
 
-      /* 印刷時も完全に外枠なし */
       .photo-card {
         padding: 0 !important;
         border: none !important;
         background: transparent !important;
+        height: 100% !important;
       }
 
       .photo-controls, .photo-overlay-actions { display: none !important; }
       .photo-box {
         border: none !important;
         background: transparent !important;
+        height: auto !important;
       }
       .photo-box img {
         object-fit: contain !important;
