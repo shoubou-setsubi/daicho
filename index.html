@@ -3,12 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>消防用設備 写真台帳作成 Pro (Full Version)</title>
+  <title>消防用設備 写真台帳作成 Pro</title>
 
   <style>
     :root {
       --primary: #2563eb;
-      --primary-hover: #1d4ed8;
       --bg-main: #f8fafc;
       --card-bg: #ffffff;
       --text-main: #0f172a;
@@ -250,7 +249,14 @@
     .photo-card {
       border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px;
       background: #fafafa; display: flex; flex-direction: column; gap: 6px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
     }
+    .photo-card.next-target {
+      border: 2px solid #2563eb !important;
+      box-shadow: 0 0 12px rgba(37, 99, 235, 0.4);
+      background-color: #eff6ff;
+    }
+
     .photo-box {
       width: 100%; aspect-ratio: 4 / 3; background: #0f172a;
       border: 2px dashed #cbd5e1; border-radius: 6px; display: flex;
@@ -263,6 +269,15 @@
       border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;
       flex: 1; text-align: center; min-height: 38px; display: inline-flex;
       align-items: center; justify-content: center;
+    }
+    .photo-btn-highlight {
+      background: #2563eb !important; color: #fff !important; border-color: #1d4ed8 !important;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
     }
     
     /* 写真操作オーバーレイ */
@@ -330,13 +345,13 @@
       <button class="btn btn-sky" onclick="toggleSidebar()">⚡ 定型文＆表題</button>
       
       <!-- ⚡ 連続撮影モード切り替えボタン -->
-      <button class="btn" id="btnContinuousMode" onclick="toggleContinuousMode()">📷 連続撮影: OFF</button>
+      <button class="btn" id="btnContinuousMode" onclick="toggleContinuousMode()">📷 連続モード: OFF</button>
 
       <button class="btn" onclick="addPage()">＋ ページ追加</button>
-      <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力・共有</button>
+      <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力</button>
       <button class="btn btn-indigo" onclick="triggerImportFile()">📥 読込</button>
       <input type="file" id="importFileInput" accept=".json,.txt" style="display:none;" onchange="importDataFile(event)">
-      <button class="btn btn-amber" onclick="clearCurrentProjectData()">🗑 リセット</button>
+      <button class="btn btn-amber" onclick="clearCurrentProjectData()">🗑 初期化</button>
       <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷</button>
     </div>
   </div>
@@ -532,12 +547,18 @@
       isContinuousMode = !isContinuousMode;
       const btn = document.getElementById('btnContinuousMode');
       if (isContinuousMode) {
-        btn.textContent = '📷 連続撮影: ON';
+        btn.textContent = '📷 連続モード: ON';
         btn.classList.add('btn-toggle-active');
       } else {
-        btn.textContent = '📷 連続撮影: OFF';
+        btn.textContent = '📷 連続モード: OFF';
         btn.classList.remove('btn-toggle-active');
+        clearHighlights();
       }
+    }
+
+    function clearHighlights() {
+      document.querySelectorAll('.photo-card').forEach(el => el.classList.remove('next-target'));
+      document.querySelectorAll('.photo-btn').forEach(el => el.classList.remove('photo-btn-highlight'));
     }
 
     function toggleProjectMenu(event) {
@@ -657,11 +678,9 @@
       }
     }
 
-    /* 安全リセット（自動バックアップ機能付き） */
+    /* 🗑️ リセット機能（即時初期化・バックアップなし） */
     function clearCurrentProjectData() {
-      if (confirm('リセットする前に自動バックアップを出力します。よろしいですか？')) {
-        exportDataFile(true); // 自動バックアップ出力
-
+      if (confirm('現在の表示・データをすべて初期化しますか？')) {
         localStorage.removeItem('fire_data_' + currentProjectId);
         document.getElementById('pagesContainer').innerHTML = '';
         document.getElementById('buildingName').value = '';
@@ -672,6 +691,7 @@
         updateHeader();
         updateProjectNameInSelect();
         saveData();
+        clearHighlights();
       }
     }
 
@@ -761,22 +781,21 @@
     }
 
     /* データ出力・共有 */
-    async function exportDataFile(isAutoBackup = false) {
+    async function exportDataFile() {
       saveData();
       const raw = localStorage.getItem('fire_data_' + currentProjectId);
-      if (!raw) { if (!isAutoBackup) alert('保存するデータがありません。'); return; }
+      if (!raw) { alert('保存するデータがありません。'); return; }
 
       const bName = document.getElementById('buildingName').value || '写真台帳';
-      const prefix = isAutoBackup ? 'BACKUP_' : '';
-      const defaultFileName = `${prefix}${bName}_${new Date().toISOString().split('T')[0]}.json`;
+      const defaultFileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
 
-      let fileName = isAutoBackup ? defaultFileName : prompt('保存するファイル名を入力してください:', defaultFileName);
+      let fileName = prompt('保存するファイル名を入力してください:', defaultFileName);
       if (!fileName) return;
       if (!fileName.endsWith('.json') && !fileName.endsWith('.txt')) fileName += '.json';
 
       const blob = new Blob([raw], { type: 'application/json;charset=utf-8' });
 
-      if (!isAutoBackup && 'showSaveFilePicker' in window) {
+      if ('showSaveFilePicker' in window) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: fileName,
@@ -994,8 +1013,8 @@
                 <button class="overlay-btn overlay-btn-del" onclick="clearPhoto('${cardId}')">✕</button>
               </div>
               <div class="photo-controls" id="btn-group-${cardId}">
-                <button class="photo-btn" onclick="triggerFile('${cardId}', true)">📷 撮影</button>
-                <button class="photo-btn" onclick="triggerFile('${cardId}', false)">🖼️ 選択</button>
+                <button class="photo-btn" id="btn-cam-${cardId}" onclick="triggerFile('${cardId}', true)">📷 撮影</button>
+                <button class="photo-btn" id="btn-lib-${cardId}" onclick="triggerFile('${cardId}', false)">🖼️ 選択</button>
               </div>
               <input type="file" id="input-cam-${cardId}" class="file-input" accept="image/*" capture="environment" onchange="handleFileSelect(event, '${cardId}')">
               <input type="file" id="input-lib-${cardId}" class="file-input" accept="image/*" onchange="handleFileSelect(event, '${cardId}')">
@@ -1039,7 +1058,7 @@
       inputEl.value = ''; inputEl.click();
     }
 
-    /* 写真読み込み・軽量圧縮（長辺500px / 品質0.45で大容量保存対応） */
+    /* 写真読み込み・軽量圧縮 */
     function handleFileSelect(event, cardId) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1066,9 +1085,9 @@
           setPhotoData(cardId, compressedDataUrl, 0, 1);
           saveData();
 
-          // ⚡ 連続撮影モード時の次枠自動フォーカス処理
+          // 📷 連続撮影モード時の次枠フォーカス・ガイド処理
           if (isContinuousMode) {
-            setTimeout(() => { triggerNextPhotoSlot(cardId); }, 300);
+            highlightNextPhotoSlot(cardId);
           }
         };
         img.src = e.target.result;
@@ -1076,13 +1095,24 @@
       reader.readAsDataURL(file);
     }
 
-    function triggerNextPhotoSlot(currentCardId) {
+    function highlightNextPhotoSlot(currentCardId) {
+      clearHighlights();
       const allCards = Array.from(document.querySelectorAll('.photo-card'));
       const currentIndex = allCards.findIndex(c => c.id === `card-${currentCardId}`);
+      
       if (currentIndex !== -1 && currentIndex < allCards.length - 1) {
         const nextCard = allCards[currentIndex + 1];
         const nextCardId = nextCard.id.replace('card-', '');
-        triggerFile(nextCardId, true);
+        
+        // 次のカードをスクロール表示・青枠ハイライト
+        nextCard.classList.add('next-target');
+        nextCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // 「📷 撮影」ボタンを青く強調
+        const targetBtn = document.getElementById(`btn-cam-${nextCardId}`);
+        if (targetBtn) {
+          targetBtn.classList.add('photo-btn-highlight');
+        }
       }
     }
 
