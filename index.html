@@ -56,7 +56,7 @@
       align-items: center;
       gap: 6px;
       white-space: nowrap;
-      margin-right: auto; /* 左側にタイトルを維持しつつ右側にボタンを集約 */
+      margin-right: auto;
     }
     .nav-title span {
       background: linear-gradient(135deg, #38bdf8, #818cf8);
@@ -99,7 +99,7 @@
     .btn-sky { background-color: #0284c7; border: none; }
     .btn-toggle-active { background-color: #059669; border-color: #34d399; }
 
-    /* ドロップダウン */
+    /* ドロップダウン (PC) */
     .project-dropdown-wrapper { position: relative; }
     .project-menu-popup {
       display: none;
@@ -112,8 +112,8 @@
       border: 1px solid #475569;
       border-radius: var(--radius-md);
       padding: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-      z-index: 110;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      z-index: 150;
       flex-direction: column;
       gap: 10px;
     }
@@ -142,7 +142,7 @@
     /* コンテナ */
     .container { max-width: 900px; margin: 16px auto; padding: 0 12px; }
 
-    /* 台帳の基本設定パネル（デフォルトで表示） */
+    /* 台帳の基本設定パネル */
     .meta-toggle-btn {
       width: 100%;
       background: #ffffff;
@@ -312,7 +312,6 @@
     .grid-6 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(3, 1fr); }
     .grid-8 { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 1fr); }
 
-    /* 外枠なし・すっきりカード */
     .photo-card {
       border: none;
       border-radius: 0;
@@ -451,7 +450,19 @@
         font-size: 10px;
         min-height: 34px;
       }
-      .project-dropdown-wrapper { grid-column: span 1; }
+      .project-dropdown-wrapper { grid-column: span 1; position: relative; }
+
+      /* スマホ時の物件ドロップダウン調整（画面からはみ出さず中央寄せ配置） */
+      .project-menu-popup {
+        position: fixed;
+        top: 55px;
+        left: 12px;
+        right: 12px;
+        width: auto;
+        margin-top: 0;
+        z-index: 250;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      }
 
       .page {
         width: 100% !important;
@@ -588,7 +599,7 @@
 </head>
 <body>
 
-  <!-- 上部ナビゲーションバー（PC右寄せバランス型） -->
+  <!-- 上部ナビゲーションバー -->
   <div class="nav-bar no-print">
     <div class="nav-title">📷 <span>写真台帳 Pro</span></div>
     <div class="nav-buttons">
@@ -617,7 +628,7 @@
   </div>
 
   <div class="container">
-    <!-- 基本設定（トグルボタン） -->
+    <!-- 基本設定トグル -->
     <button class="meta-toggle-btn no-print" onclick="toggleMetaPanel()">
       <span>⚙️ 台帳の基本設定（物件名・配置枚数など）</span>
       <span id="metaToggleIcon">▲</span>
