@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>消防用設備 写真台帳作成 Pro</title>
+  <title>消防用設備 写真台帳作成 Pro (Full Version)</title>
 
   <style>
     :root {
@@ -39,7 +39,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: #fff;
-      padding: 10px 16px;
+      padding: 10px 14px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       display: flex;
       justify-content: space-between;
@@ -60,7 +60,7 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nav-buttons { display: flex; gap: 6px; flex-wrap: wrap; position: relative; align-items: center; }
 
     .btn {
       background-color: #334155;
@@ -86,62 +86,50 @@
     .btn-rose { background-color: #e11d48; border: none; }
     .btn-indigo { background-color: #4f46e5; border: none; }
     .btn-sky { background-color: #0284c7; border: none; }
+    .btn-toggle-active { background-color: #059669; border-color: #34d399; }
 
-    /* ⚡ 画面右側の空きスペースに浮遊・固定配置するボタン（四角形デザイン） */
-    .right-floating-trigger {
-      position: fixed;
-      top: 120px;
-      right: 20px;
-      z-index: 150;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 700;
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 4px; /* 四角形に変更 */
-      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-    }
-    .right-floating-trigger:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(2, 132, 199, 0.5);
-    }
-
-    /* コンテナ */
-    .container { max-width: 880px; margin: 12px auto; padding: 0 10px; }
-
-    /* 📁 複数物件切り替えバー */
-    .project-bar {
-      background: #334155;
-      color: #fff;
-      padding: 10px 14px;
+    /* 📁 上部ヘッダー収納用ドロップダウン */
+    .project-dropdown-wrapper { position: relative; }
+    .project-menu-popup {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 6px;
+      width: 280px;
+      background: #1e293b;
+      border: 1px solid #475569;
       border-radius: var(--radius-md);
-      margin-bottom: 12px;
-      box-shadow: var(--shadow-md);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
+      padding: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      z-index: 110;
+      flex-direction: column;
+      gap: 10px;
     }
-    .project-selector {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-      min-width: 240px;
-    }
-    .project-selector label { font-size: 12px; font-weight: 700; color: #94a3b8; white-space: nowrap; }
-    .project-selector select {
-      flex: 1;
+    .project-menu-popup.is-open { display: flex; }
+    .project-menu-popup label { font-size: 11px; font-weight: 700; color: #94a3b8; }
+    .project-menu-popup select {
+      width: 100%;
       padding: 8px 10px;
       border-radius: var(--radius-sm);
       border: 1px solid #475569;
-      background: #1e293b;
+      background: #0f172a;
       color: #fff;
       font-size: 13px;
       font-weight: 600;
-      min-height: 36px;
+      min-height: 38px;
     }
+    .project-menu-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-top: 1px solid #334155;
+      padding-top: 8px;
+    }
+    .project-menu-actions .btn { width: 100%; justify-content: flex-start; }
+
+    /* コンテナ */
+    .container { max-width: 880px; margin: 12px auto; padding: 0 10px; }
 
     /* 基本情報入力パネル */
     .meta-panel {
@@ -168,82 +156,44 @@
       width: 100%;
     }
 
-    /* ⚡ 右サイドバー（スライド引き出し型定型文パレット） */
+    /* ⚡ 右サイドバー */
     .sidebar-overlay {
       position: fixed;
       top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(15, 23, 42, 0.4);
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
+      z-index: 200; opacity: 0; pointer-events: none;
       transition: opacity 0.3s ease;
     }
-    .sidebar-overlay.is-active {
-      opacity: 1;
-      pointer-events: auto;
-    }
+    .sidebar-overlay.is-active { opacity: 1; pointer-events: auto; }
 
     .sidebar-panel {
       position: fixed;
       top: 0; right: 0; width: 320px; max-width: 85vw; height: 100vh;
-      background: #ffffff;
-      z-index: 201;
+      background: #ffffff; z-index: 201;
       box-shadow: -4px 0 24px rgba(0,0,0,0.2);
       transform: translateX(100%);
       transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      display: flex; flex-direction: column; overflow: hidden;
     }
-    .sidebar-panel.is-active {
-      transform: translateX(0);
-    }
+    .sidebar-panel.is-active { transform: translateX(0); }
 
     .sidebar-header {
-      padding: 14px 16px;
-      background: #0f172a;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 700;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      padding: 14px 16px; background: #0f172a; color: #fff;
+      font-size: 14px; font-weight: 700; display: flex;
+      justify-content: space-between; align-items: center;
     }
-    .sidebar-close-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      font-size: 18px;
-      cursor: pointer;
-      padding: 4px 8px;
-    }
+    .sidebar-close-btn { background: transparent; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; padding: 4px 8px; }
 
-    .sidebar-body {
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      flex: 1;
-    }
+    .sidebar-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; flex: 1; }
 
     .quick-section { display: flex; flex-direction: column; gap: 6px; }
     .quick-section-label { font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: 0.5px; text-transform: uppercase; }
     .quick-tags-group { display: flex; flex-wrap: wrap; gap: 6px; }
 
     .tag-chip {
-      background-color: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      color: #334155;
-      padding: 7px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      min-height: 34px;
+      background-color: #f1f5f9; border: 1px solid #cbd5e1; color: #334155;
+      padding: 7px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 4px; min-height: 34px;
     }
     .tag-chip.type-process { background-color: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
     .tag-chip.type-equipment { background-color: #faf5ff; color: #7e22ce; border-color: #e9d5ff; }
@@ -255,30 +205,19 @@
     .tag-del-btn { font-size: 11px; color: #94a3b8; margin-left: 2px; }
 
     .add-tag-btn {
-      background-color: #f8fafc;
-      border: 1px dashed #94a3b8;
-      color: #475569;
-      padding: 7px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      min-height: 36px;
+      background-color: #f8fafc; border: 1px dashed #94a3b8; color: #475569;
+      padding: 7px 14px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      cursor: pointer; min-height: 36px;
     }
 
     /* フローティングバー */
     .mobile-float-bar {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      z-index: 99;
-      background: rgba(15, 23, 42, 0.95);
-      padding: 10px 12px;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 99;
+      background: rgba(15, 23, 42, 0.95); padding: 10px 12px;
       border-top: 1px solid rgba(255,255,255,0.15);
       transform: translateY(100%);
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      display: flex; flex-direction: column; gap: 8px;
     }
     .mobile-float-bar.is-visible { transform: translateY(0); }
     .mobile-float-title { font-size: 11px; color: #94a3b8; font-weight: 700; display: flex; justify-content: space-between; }
@@ -287,23 +226,13 @@
 
     /* A4台帳シート */
     .page {
-      background: #fff;
-      width: 100%; max-width: 210mm; min-height: 297mm;
-      margin: 0 auto 20px auto;
-      padding: 12mm 10mm;
-      box-shadow: var(--shadow-lg);
-      border-radius: 8px;
-      position: relative;
-      box-sizing: border-box;
-      border: 1px solid #e2e8f0;
+      background: #fff; width: 100%; max-width: 210mm; min-height: 297mm;
+      margin: 0 auto 20px auto; padding: 12mm 10mm; box-shadow: var(--shadow-lg);
+      border-radius: 8px; position: relative; box-sizing: border-box; border: 1px solid #e2e8f0;
     }
     .page-header {
-      border-bottom: 2px solid #0f172a;
-      padding-bottom: 8px;
-      margin-bottom: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
+      border-bottom: 2px solid #0f172a; padding-bottom: 8px; margin-bottom: 12px;
+      display: flex; justify-content: space-between; align-items: flex-end;
     }
     .page-title { font-size: 18px; font-weight: 800; color: #0f172a; }
     .page-meta { font-size: 11px; color: #475569; text-align: right; line-height: 1.4; }
@@ -319,33 +248,31 @@
     .grid-8 { grid-template-columns: 1fr 1fr; }
 
     .photo-card {
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 8px;
-      background: #fafafa;
-      display: flex; flex-direction: column; gap: 6px;
+      border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px;
+      background: #fafafa; display: flex; flex-direction: column; gap: 6px;
     }
     .photo-box {
-      width: 100%; aspect-ratio: 4 / 3;
-      background: #0f172a;
-      border: 2px dashed #cbd5e1;
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      position: relative; overflow: hidden;
+      width: 100%; aspect-ratio: 4 / 3; background: #0f172a;
+      border: 2px dashed #cbd5e1; border-radius: 6px; display: flex;
+      align-items: center; justify-content: center; position: relative; overflow: hidden;
     }
-    .photo-box img { width: 100%; height: 100%; object-fit: contain; display: none; transition: transform 0.2s; }
+    .photo-box img { width: 100%; height: 100%; object-fit: contain; display: none; transition: transform 0.15s ease-out; }
     .photo-controls { display: flex; gap: 8px; z-index: 2; width: 90%; }
     .photo-btn {
-      background: #fff; border: 1px solid #cbd5e1;
-      padding: 8px 12px; border-radius: 6px;
-      font-size: 13px; font-weight: 700; cursor: pointer;
-      flex: 1; text-align: center; min-height: 38px;
-      display: inline-flex; align-items: center; justify-content: center;
+      background: #fff; border: 1px solid #cbd5e1; padding: 8px 12px;
+      border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;
+      flex: 1; text-align: center; min-height: 38px; display: inline-flex;
+      align-items: center; justify-content: center;
     }
-    .photo-overlay-actions { position: absolute; top: 6px; right: 6px; display: none; gap: 6px; z-index: 3; }
+    
+    /* 写真操作オーバーレイ */
+    .photo-overlay-actions {
+      position: absolute; top: 4px; right: 4px; left: 4px;
+      display: none; gap: 4px; z-index: 3; justify-content: flex-end; flex-wrap: wrap;
+    }
     .overlay-btn {
       background: rgba(15, 23, 42, 0.88); color: #fff; border: none;
-      padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer;
+      padding: 5px 8px; border-radius: 5px; font-size: 10px; font-weight: 700; cursor: pointer;
     }
     .overlay-btn-save { background: rgba(5, 150, 105, 0.95); }
     .overlay-btn-del { background: rgba(225, 29, 72, 0.95); }
@@ -361,13 +288,16 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: #94a3b8; }
     .status-dot.online { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
-    /* 印刷スタイル */
-    @page { size: A4 portrait; margin: 0; }
+    /* 印刷スタイル最適化 */
+    @page { size: A4 portrait; margin: 6mm; }
     @media print {
       html, body { width: 210mm; height: 100%; margin: 0 !important; padding: 0 !important; background: #fff; }
-      .no-print, .nav-bar, .project-bar, .meta-panel, .sidebar-overlay, .sidebar-panel, .save-status, .mobile-float-bar, .right-floating-trigger { display: none !important; }
+      .no-print, .nav-bar, .meta-panel, .sidebar-overlay, .sidebar-panel, .save-status, .mobile-float-bar { display: none !important; }
       .container { max-width: 100% !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-      .page { box-shadow: none !important; border: none !important; width: 210mm !important; height: 296mm !important; padding: 10mm !important; margin: 0 !important; page-break-after: always; }
+      .page {
+        box-shadow: none !important; border: none !important; width: 198mm !important;
+        height: 284mm !important; padding: 4mm !important; margin: 0 auto !important; page-break-after: always;
+      }
       .photo-controls, .photo-overlay-actions { display: none !important; }
       .photo-box { border: none !important; background: transparent !important; }
       .caption-group input { border: none !important; border-bottom: 1px solid #94a3b8 !important; border-radius: 0 !important; background: transparent !important; }
@@ -381,6 +311,27 @@
   <div class="nav-bar no-print">
     <div class="nav-title">📷 消防用設備 <span>写真台帳 Pro</span></div>
     <div class="nav-buttons">
+      
+      <!-- 📁 作業物件ドロップダウン -->
+      <div class="project-dropdown-wrapper">
+        <button class="btn btn-sky" onclick="toggleProjectMenu(event)">📁 作業物件 ▾</button>
+        <div class="project-menu-popup" id="projectMenuPopup">
+          <label>切り替え対象を選択:</label>
+          <select id="projectSelect" onchange="switchProject(this.value)"></select>
+          <div class="project-menu-actions">
+            <button class="btn" onclick="renameCurrentProject()">✏️ 名称を変更</button>
+            <button class="btn btn-indigo" onclick="createNewProject()">＋ 新規物件を追加</button>
+            <button class="btn btn-rose" onclick="deleteCurrentProject()">🗑 この物件を削除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ⚡ 定型文＆表題ボタン -->
+      <button class="btn btn-sky" onclick="toggleSidebar()">⚡ 定型文＆表題</button>
+      
+      <!-- ⚡ 連続撮影モード切り替えボタン -->
+      <button class="btn" id="btnContinuousMode" onclick="toggleContinuousMode()">📷 連続撮影: OFF</button>
+
       <button class="btn" onclick="addPage()">＋ ページ追加</button>
       <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力・共有</button>
       <button class="btn btn-indigo" onclick="triggerImportFile()">📥 読込</button>
@@ -390,23 +341,7 @@
     </div>
   </div>
 
-  <!-- ⚡ 画面右側に固定配置する起動ボタン（「定型文＆表題」表記 / 四角形） -->
-  <button class="btn btn-sky right-floating-trigger no-print" onclick="toggleSidebar()">⚡ 定型文＆表題</button>
-
   <div class="container">
-    
-    <!-- 📁 複数物件切り替えバー -->
-    <div class="project-bar no-print">
-      <div class="project-selector">
-        <label>📁 作業物件:</label>
-        <select id="projectSelect" onchange="switchProject(this.value)"></select>
-      </div>
-      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-        <button class="btn" onclick="renameCurrentProject()" style="min-height: 34px;">✏️ 名称変更</button>
-        <button class="btn btn-indigo" onclick="createNewProject()" style="min-height: 34px;">＋ 新規物件を追加</button>
-        <button class="btn btn-rose" onclick="deleteCurrentProject()" style="min-height: 34px;">🗑 この物件を削除</button>
-      </div>
-    </div>
 
     <!-- 基本設定・台帳種類選択 -->
     <div class="meta-panel no-print">
@@ -487,11 +422,11 @@
     <div id="pagesContainer"></div>
   </div>
 
-  <!-- ⚡ 右サイドバー（スライド引き出しパレット） -->
+  <!-- ⚡ 右サイドバー -->
   <div class="sidebar-overlay no-print" id="sidebarOverlay" onclick="toggleSidebar()"></div>
   <div class="sidebar-panel no-print" id="sidebarPanel">
     <div class="sidebar-header">
-      <span>⚡ ワンタップ定型文・表題パレット</span>
+      <span>⚡ 定型文・表題パレット</span>
       <button class="sidebar-close-btn" onclick="toggleSidebar()">✕</button>
     </div>
     <div class="sidebar-body">
@@ -566,6 +501,7 @@
     let activeInput = null;
     let customTags = [];
     let customDocTypes = [];
+    let isContinuousMode = false;
     
     let projectsList = [];
     let currentProjectId = 'proj_default';
@@ -578,25 +514,46 @@
         }
       });
 
+      document.addEventListener('click', (e) => {
+        const popup = document.getElementById('projectMenuPopup');
+        const wrapper = e.target.closest('.project-dropdown-wrapper');
+        if (!wrapper && popup.classList.contains('is-open')) {
+          popup.classList.remove('is-open');
+        }
+      });
+
       loadCustomDocTypes();
       loadCustomTags();
       initProjectsList();
     };
 
-    /* ⚡ 右サイドバー開閉表示制御 */
-    function toggleSidebar() {
-      const overlay = document.getElementById('sidebarOverlay');
-      const panel = document.getElementById('sidebarPanel');
-      overlay.classList.toggle('is-active');
-      panel.classList.toggle('is-active');
+    /* 連続撮影モードの切り替え */
+    function toggleContinuousMode() {
+      isContinuousMode = !isContinuousMode;
+      const btn = document.getElementById('btnContinuousMode');
+      if (isContinuousMode) {
+        btn.textContent = '📷 連続撮影: ON';
+        btn.classList.add('btn-toggle-active');
+      } else {
+        btn.textContent = '📷 連続撮影: OFF';
+        btn.classList.remove('btn-toggle-active');
+      }
     }
 
-    /* 📁 複数物件管理ロジック */
+    function toggleProjectMenu(event) {
+      event.stopPropagation();
+      document.getElementById('projectMenuPopup').classList.toggle('is-open');
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebarOverlay').classList.toggle('is-active');
+      document.getElementById('sidebarPanel').classList.toggle('is-active');
+    }
+
+    /* 📁 複数物件管理 */
     function initProjectsList() {
       const rawList = localStorage.getItem('fire_projects_list');
-      if (rawList) {
-        try { projectsList = JSON.parse(rawList); } catch(e) { projectsList = []; }
-      }
+      if (rawList) { try { projectsList = JSON.parse(rawList); } catch(e) { projectsList = []; } }
 
       if (projectsList.length === 0) {
         currentProjectId = 'proj_' + Date.now();
@@ -644,6 +601,8 @@
       addPage();
       updateHeader();
       saveData();
+
+      document.getElementById('projectMenuPopup').classList.remove('is-open');
     }
 
     function renameCurrentProject() {
@@ -658,13 +617,11 @@
         updateHeader();
         saveData();
       }
+      document.getElementById('projectMenuPopup').classList.remove('is-open');
     }
 
     function deleteCurrentProject() {
-      if (projectsList.length <= 1) {
-        alert('作業物件が1件しかないため削除できません。');
-        return;
-      }
+      if (projectsList.length <= 1) { alert('作業物件が1件しかないため削除できません。'); return; }
 
       const cur = projectsList.find(p => p.id === currentProjectId);
       const nameStr = cur ? cur.name : 'この物件';
@@ -678,6 +635,7 @@
         renderProjectSelect();
         loadDataForCurrentProject();
       }
+      document.getElementById('projectMenuPopup').classList.remove('is-open');
     }
 
     function switchProject(targetId) {
@@ -686,6 +644,7 @@
       currentProjectId = targetId;
       saveProjectsList();
       loadDataForCurrentProject();
+      document.getElementById('projectMenuPopup').classList.remove('is-open');
     }
 
     function updateProjectNameInSelect() {
@@ -698,8 +657,11 @@
       }
     }
 
+    /* 安全リセット（自動バックアップ機能付き） */
     function clearCurrentProjectData() {
-      if (confirm('現在表示中の物件の入力・写真を初期化（リセット）しますか？')) {
+      if (confirm('リセットする前に自動バックアップを出力します。よろしいですか？')) {
+        exportDataFile(true); // 自動バックアップ出力
+
         localStorage.removeItem('fire_data_' + currentProjectId);
         document.getElementById('pagesContainer').innerHTML = '';
         document.getElementById('buildingName').value = '';
@@ -799,21 +761,22 @@
     }
 
     /* データ出力・共有 */
-    async function exportDataFile() {
+    async function exportDataFile(isAutoBackup = false) {
       saveData();
       const raw = localStorage.getItem('fire_data_' + currentProjectId);
-      if (!raw) { alert('保存するデータがありません。'); return; }
+      if (!raw) { if (!isAutoBackup) alert('保存するデータがありません。'); return; }
 
       const bName = document.getElementById('buildingName').value || '写真台帳';
-      const defaultFileName = `${bName}_${new Date().toISOString().split('T')[0]}.json`;
+      const prefix = isAutoBackup ? 'BACKUP_' : '';
+      const defaultFileName = `${prefix}${bName}_${new Date().toISOString().split('T')[0]}.json`;
 
-      let fileName = prompt('保存するファイル名を入力してください:', defaultFileName);
+      let fileName = isAutoBackup ? defaultFileName : prompt('保存するファイル名を入力してください:', defaultFileName);
       if (!fileName) return;
       if (!fileName.endsWith('.json') && !fileName.endsWith('.txt')) fileName += '.json';
 
       const blob = new Blob([raw], { type: 'application/json;charset=utf-8' });
 
-      if ('showSaveFilePicker' in window) {
+      if (!isAutoBackup && 'showSaveFilePicker' in window) {
         try {
           const handle = await window.showSaveFilePicker({
             suggestedName: fileName,
@@ -821,14 +784,6 @@
           });
           const writable = await handle.createWritable();
           await writable.write(blob); await writable.close();
-          return;
-        } catch (err) { if (err.name === 'AbortError') return; }
-      }
-
-      const file = new File([blob], fileName, { type: 'application/json' });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ title: `【写真台帳データ】${bName}`, text: `現場からの写真台帳データです。（${bName}）`, files: [file] });
           return;
         } catch (err) { if (err.name === 'AbortError') return; }
       }
@@ -1030,11 +985,13 @@
         cardsHtml += `
           <div class="photo-card" id="card-${cardId}">
             <div class="photo-box" id="box-${cardId}">
-              <img id="img-${cardId}" src="" alt="写真" data-rotate="0">
+              <img id="img-${cardId}" src="" alt="写真" data-rotate="0" data-scale="1">
               <div class="photo-overlay-actions" id="overlay-${cardId}">
-                <button class="overlay-btn overlay-btn-save" onclick="downloadPhoto('${cardId}')">💾 保存</button>
+                <button class="overlay-btn overlay-btn-save" onclick="downloadPhoto('${cardId}')">💾</button>
+                <button class="overlay-btn" onclick="zoomPhoto('${cardId}', 0.1)">➕</button>
+                <button class="overlay-btn" onclick="zoomPhoto('${cardId}', -0.1)">➖</button>
                 <button class="overlay-btn" onclick="rotatePhoto('${cardId}')">↺ 回転</button>
-                <button class="overlay-btn overlay-btn-del" onclick="clearPhoto('${cardId}')">✕ 削除</button>
+                <button class="overlay-btn overlay-btn-del" onclick="clearPhoto('${cardId}')">✕</button>
               </div>
               <div class="photo-controls" id="btn-group-${cardId}">
                 <button class="photo-btn" onclick="triggerFile('${cardId}', true)">📷 撮影</button>
@@ -1082,6 +1039,7 @@
       inputEl.value = ''; inputEl.click();
     }
 
+    /* 写真読み込み・軽量圧縮（長辺500px / 品質0.45で大容量保存対応） */
     function handleFileSelect(event, cardId) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1091,7 +1049,7 @@
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
-          const maxDim = 600;
+          const maxDim = 500;
           let width = img.width; let height = img.height;
 
           if (width > height) {
@@ -1104,16 +1062,31 @@
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, width, height);
 
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.55);
-          setPhotoData(cardId, compressedDataUrl, 0);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.45);
+          setPhotoData(cardId, compressedDataUrl, 0, 1);
           saveData();
+
+          // ⚡ 連続撮影モード時の次枠自動フォーカス処理
+          if (isContinuousMode) {
+            setTimeout(() => { triggerNextPhotoSlot(cardId); }, 300);
+          }
         };
         img.src = e.target.result;
       };
       reader.readAsDataURL(file);
     }
 
-    function setPhotoData(cardId, srcUrl, deg = 0) {
+    function triggerNextPhotoSlot(currentCardId) {
+      const allCards = Array.from(document.querySelectorAll('.photo-card'));
+      const currentIndex = allCards.findIndex(c => c.id === `card-${currentCardId}`);
+      if (currentIndex !== -1 && currentIndex < allCards.length - 1) {
+        const nextCard = allCards[currentIndex + 1];
+        const nextCardId = nextCard.id.replace('card-', '');
+        triggerFile(nextCardId, true);
+      }
+    }
+
+    function setPhotoData(cardId, srcUrl, deg = 0, scale = 1) {
       const imgEl = document.getElementById(`img-${cardId}`);
       const btnGroup = document.getElementById(`btn-group-${cardId}`);
       const overlay = document.getElementById(`overlay-${cardId}`);
@@ -1121,8 +1094,25 @@
 
       imgEl.src = srcUrl; imgEl.style.display = 'block';
       imgEl.setAttribute('data-rotate', deg);
-      imgEl.style.transform = `rotate(${deg}deg)`;
+      imgEl.setAttribute('data-scale', scale);
+      applyImageTransform(imgEl, deg, scale);
       btnGroup.style.display = 'none'; overlay.style.display = 'flex';
+    }
+
+    function applyImageTransform(imgEl, deg, scale) {
+      let baseScale = scale;
+      if (deg === 90 || deg === 270) baseScale *= 0.75;
+      imgEl.style.transform = `rotate(${deg}deg) scale(${baseScale})`;
+    }
+
+    function zoomPhoto(cardId, delta) {
+      const imgEl = document.getElementById(`img-${cardId}`);
+      let scale = parseFloat(imgEl.getAttribute('data-scale') || '1');
+      let deg = parseInt(imgEl.getAttribute('data-rotate') || '0', 10);
+      scale = Math.max(0.5, Math.min(2.5, scale + delta));
+      imgEl.setAttribute('data-scale', scale);
+      applyImageTransform(imgEl, deg, scale);
+      saveData();
     }
 
     function downloadPhoto(cardId) {
@@ -1136,10 +1126,10 @@
     function rotatePhoto(cardId) {
       const imgEl = document.getElementById(`img-${cardId}`);
       let deg = parseInt(imgEl.getAttribute('data-rotate') || '0', 10);
+      let scale = parseFloat(imgEl.getAttribute('data-scale') || '1');
       deg = (deg + 90) % 360;
       imgEl.setAttribute('data-rotate', deg);
-      if (deg === 90 || deg === 270) imgEl.style.transform = `rotate(${deg}deg) scale(0.75)`;
-      else imgEl.style.transform = `rotate(${deg}deg) scale(1)`;
+      applyImageTransform(imgEl, deg, scale);
       saveData();
     }
 
@@ -1149,7 +1139,8 @@
       const overlay = document.getElementById(`overlay-${cardId}`);
 
       imgEl.removeAttribute('src'); imgEl.style.display = 'none';
-      imgEl.setAttribute('data-rotate', '0'); imgEl.style.transform = 'rotate(0deg) scale(1)';
+      imgEl.setAttribute('data-rotate', '0'); imgEl.setAttribute('data-scale', '1');
+      imgEl.style.transform = 'rotate(0deg) scale(1)';
       btnGroup.style.display = 'flex'; overlay.style.display = 'none';
       document.getElementById(`input-cam-${cardId}`).value = '';
       document.getElementById(`input-lib-${cardId}`).value = '';
@@ -1184,6 +1175,7 @@
             data.cards[cardId] = {
               imgSrc: imgEl.style.display !== 'none' && imgEl.src.startsWith('data:') ? imgEl.src : '',
               rotate: imgEl.getAttribute('data-rotate') || '0',
+              scale: imgEl.getAttribute('data-scale') || '1',
               t1: document.getElementById(`t1-${cardId}`)?.value || '',
               t2: document.getElementById(`t2-${cardId}`)?.value || '',
               t3: document.getElementById(`t3-${cardId}`)?.value || ''
@@ -1220,12 +1212,7 @@
         Object.keys(data.cards).forEach(cardId => {
           const item = data.cards[cardId];
           if (item.imgSrc) {
-            setPhotoData(cardId, item.imgSrc, parseInt(item.rotate || '0', 10));
-            const imgEl = document.getElementById(`img-${cardId}`);
-            const deg = parseInt(item.rotate || '0', 10);
-            if (imgEl && (deg === 90 || deg === 270)) {
-              imgEl.style.transform = `rotate(${deg}deg) scale(0.75)`;
-            }
+            setPhotoData(cardId, item.imgSrc, parseInt(item.rotate || '0', 10), parseFloat(item.scale || '1'));
           }
           if (document.getElementById(`t1-${cardId}`)) document.getElementById(`t1-${cardId}`).value = item.t1;
           if (document.getElementById(`t2-${cardId}`)) document.getElementById(`t2-${cardId}`).value = item.t2;
