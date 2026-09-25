@@ -25,12 +25,12 @@
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       background-color: var(--bg-main);
       color: var(--text-main);
-      padding-bottom: 120px;
+      padding-bottom: 140px;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
 
-    /* 上部ヘッダー（スマホ最適化版） */
+    /* 上部ヘッダー（PC右寄せ・圧迫感軽減） */
     .nav-bar {
       position: sticky;
       top: 0;
@@ -39,28 +39,24 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       color: #fff;
-      padding: 8px 10px;
+      padding: 10px 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .nav-top-line {
-      display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
-      width: 100%;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .nav-title {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       letter-spacing: 0.5px;
       display: flex;
       align-items: center;
       gap: 6px;
       white-space: nowrap;
+      margin-right: auto; /* 左側にタイトルを維持しつつ右側にボタンを集約 */
     }
     .nav-title span {
       background: linear-gradient(135deg, #38bdf8, #818cf8);
@@ -70,17 +66,17 @@
 
     .nav-buttons {
       display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
+      gap: 8px;
       align-items: center;
-      width: 100%;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     .btn {
       background-color: #334155;
       color: #fff;
       border: 1px solid rgba(255,255,255,0.15);
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
       font-size: 12px;
       font-weight: 600;
@@ -93,7 +89,7 @@
       box-shadow: var(--shadow-sm);
       min-height: 36px;
       text-align: center;
-      flex: 1 1 auto;
+      white-space: nowrap;
     }
     .btn:active { transform: translateY(1px); opacity: 0.9; }
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
@@ -104,13 +100,12 @@
     .btn-toggle-active { background-color: #059669; border-color: #34d399; }
 
     /* ドロップダウン */
-    .project-dropdown-wrapper { position: relative; flex: 1 1 auto; }
-    .project-dropdown-wrapper .btn { width: 100%; }
+    .project-dropdown-wrapper { position: relative; }
     .project-menu-popup {
       display: none;
       position: absolute;
       top: 100%;
-      left: 0;
+      right: 0;
       margin-top: 6px;
       width: 280px;
       background: #1e293b;
@@ -145,15 +140,15 @@
     .project-menu-actions .btn { width: 100%; justify-content: flex-start; }
 
     /* コンテナ */
-    .container { max-width: 900px; margin: 10px auto; padding: 0 10px; }
+    .container { max-width: 900px; margin: 16px auto; padding: 0 12px; }
 
-    /* 開閉式設定パネル */
+    /* 台帳の基本設定パネル（デフォルトで表示） */
     .meta-toggle-btn {
       width: 100%;
       background: #ffffff;
       border: 1px solid var(--border-color);
       padding: 10px 14px;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
       font-size: 13px;
       font-weight: 700;
       color: var(--text-main);
@@ -161,21 +156,20 @@
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
-      margin-bottom: 8px;
       box-shadow: var(--shadow-sm);
     }
 
     .meta-panel {
       background: var(--card-bg);
-      padding: 14px;
-      border-radius: var(--radius-md);
-      margin-bottom: 12px;
+      padding: 16px;
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+      margin-bottom: 16px;
       border: 1px solid var(--border-color);
+      border-top: none;
       box-shadow: var(--shadow-md);
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      transition: max-height 0.3s ease, opacity 0.3s ease;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
     }
     .meta-panel.is-collapsed {
       display: none;
@@ -267,7 +261,7 @@
       background: #fff;
       width: 210mm;
       height: 297mm;
-      margin: 0 auto 20px auto;
+      margin: 0 auto 30px auto;
       padding: 10mm;
       box-shadow: var(--shadow-lg);
       border-radius: 4px;
@@ -277,6 +271,15 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+    }
+
+    .page-footer-actions {
+      margin-top: 10px;
+      padding-top: 8px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      width: 100%;
     }
 
     .page-header {
@@ -427,12 +430,18 @@
     .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; background-color: #94a3b8; }
     .status-dot.online { background-color: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.6); }
 
-    /* 📱📱📱 スマホ表示最適化 (幅768px以下) 📱📱📱 */
+    /* 📱 スマホ表示最適化 (幅768px以下) */
     @media screen and (max-width: 768px) {
-      .container { padding: 0 6px; }
-      
-      .nav-bar { padding: 6px 8px; gap: 6px; }
+      .nav-bar {
+        padding: 8px;
+        justify-content: space-between;
+      }
+      .nav-title {
+        font-size: 13px;
+        margin-right: 0;
+      }
       .nav-buttons {
+        width: 100%;
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 4px;
@@ -442,18 +451,17 @@
         font-size: 10px;
         min-height: 34px;
       }
+      .project-dropdown-wrapper { grid-column: span 1; }
 
-      /* A4固定幅を解除し、画面幅一杯に収める */
       .page {
         width: 100% !important;
         height: auto !important;
         min-height: initial !important;
         padding: 12px !important;
-        margin-bottom: 16px !important;
+        margin-bottom: 24px !important;
         box-shadow: 0 2px 8px rgba(0,0,0,0.06);
       }
 
-      /* 画面上では横持ちグリッドを解除し、垂直（1列）にカードを並べて横スクロールを防止 */
       .photo-grid {
         display: flex !important;
         flex-direction: column !important;
@@ -488,7 +496,7 @@
       }
     }
 
-    /* 🖨️ 印刷・PDF出力時は完全なA4サイズ・グリッド配置へ復元 */
+    /* 🖨️ 印刷・PDF出力 */
     @page {
       size: A4 portrait;
       margin: 0;
@@ -504,7 +512,7 @@
         -webkit-print-color-adjust: exact;
         overflow: visible !important;
       }
-      .no-print, .nav-bar, .meta-panel, .meta-toggle-btn, .sidebar-overlay, .sidebar-panel, .save-status, .mobile-float-bar {
+      .no-print, .nav-bar, .meta-panel, .meta-toggle-btn, .sidebar-overlay, .sidebar-panel, .save-status, .mobile-float-bar, .page-footer-actions {
         display: none !important;
       }
       .container {
@@ -580,12 +588,9 @@
 </head>
 <body>
 
-  <!-- 上部ナビゲーションバー（コンパクト版） -->
+  <!-- 上部ナビゲーションバー（PC右寄せバランス型） -->
   <div class="nav-bar no-print">
-    <div class="nav-top-line">
-      <div class="nav-title">📷 <span>写真台帳 Pro</span></div>
-      <button class="btn btn-emerald" onclick="doPrint()" style="flex: 0 0 auto; padding: 4px 12px;">🖨️ PDF・印刷</button>
-    </div>
+    <div class="nav-title">📷 <span>写真台帳 Pro</span></div>
     <div class="nav-buttons">
       <div class="project-dropdown-wrapper">
         <button class="btn btn-sky" onclick="toggleProjectMenu(event)">📁 物件 ▾</button>
@@ -602,23 +607,24 @@
 
       <button class="btn btn-sky" onclick="toggleSidebar()">⚡ 定型文</button>
       <button class="btn" id="btnContinuousMode" onclick="toggleContinuousMode()">📷 連続 OFF</button>
-      <button class="btn" onclick="addPage()">＋ 頁追加</button>
+      <button class="btn" onclick="addPage()">＋ ページ追加</button>
       <button class="btn btn-indigo" onclick="exportDataFile()">📤 出力</button>
       <button class="btn btn-indigo" onclick="triggerImportFile()">📥 読込</button>
       <input type="file" id="importFileInput" accept=".json,.txt" style="display:none;" onchange="importDataFile(event)">
       <button class="btn btn-amber" onclick="clearCurrentProjectData()">🗑 リセット</button>
+      <button class="btn btn-emerald" onclick="doPrint()">🖨️ PDF・印刷</button>
     </div>
   </div>
 
   <div class="container">
-    <!-- 基本設定（折りたたみトグルボタン） -->
+    <!-- 基本設定（トグルボタン） -->
     <button class="meta-toggle-btn no-print" onclick="toggleMetaPanel()">
       <span>⚙️ 台帳の基本設定（物件名・配置枚数など）</span>
-      <span id="metaToggleIcon">▼</span>
+      <span id="metaToggleIcon">▲</span>
     </button>
 
-    <!-- 基本設定パネル（デフォルト折りたたみ） -->
-    <div class="meta-panel is-collapsed no-print" id="metaPanel">
+    <!-- 基本設定パネル（デフォルト表示） -->
+    <div class="meta-panel no-print" id="metaPanel">
       <div class="input-field">
         <label>台帳の種類（表題）</label>
         <select id="docType" onchange="updateDocTitle()">
@@ -686,7 +692,7 @@
       </div>
     </div>
 
-    <div class="save-status no-print" style="margin-bottom: 8px; justify-content: flex-end;">
+    <div class="save-status no-print" style="margin-bottom: 12px; justify-content: flex-end;">
       <span class="status-dot online"></span>
       <span id="saveStatusText">自動保存が有効です</span>
     </div>
@@ -1309,9 +1315,11 @@
           </div>
         </div>
         <div class="photo-grid ${mode}">${cardsHtml}</div>
-        <div class="no-print" style="margin-top: 12px; text-align: right;">
-          ${pNum > 1 ? `<button class="btn btn-rose" onclick="removePage('page-${pNum}')">このページを削除</button>` : ''}
-        </div>
+        ${pNum > 1 ? `
+          <div class="page-footer-actions no-print">
+            <button class="btn btn-rose" onclick="removePage('page-${pNum}')">このページを削除</button>
+          </div>
+        ` : ''}
       `;
       pagesContainer.appendChild(page);
     }
