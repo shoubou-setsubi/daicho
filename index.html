@@ -90,6 +90,7 @@
       min-height: 36px;
       text-align: center;
       white-space: nowrap;
+      width: auto;
     }
     .btn:active { transform: translateY(1px); opacity: 0.9; }
     .btn-emerald { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
@@ -100,7 +101,13 @@
     .btn-toggle-active { background-color: #059669; border-color: #34d399; }
 
     /* ドロップダウン (PC) */
-    .project-dropdown-wrapper { position: relative; }
+    .project-dropdown-wrapper {
+      position: relative;
+      display: inline-flex;
+    }
+    .project-dropdown-wrapper .btn {
+      width: 100%;
+    }
     .project-menu-popup {
       display: none;
       position: absolute;
@@ -432,25 +439,33 @@
     /* 📱 スマホ表示最適化 (幅768px以下) */
     @media screen and (max-width: 768px) {
       .nav-bar {
-        padding: 8px;
+        padding: 8px 10px;
         justify-content: space-between;
       }
       .nav-title {
-        font-size: 13px;
+        font-size: 14px;
         margin-right: 0;
       }
       .nav-buttons {
         width: 100%;
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 4px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: space-between;
       }
       .nav-buttons .btn {
-        padding: 4px 2px;
+        flex: 1 1 calc(25% - 6px);
+        min-width: 0;
+        padding: 6px 4px;
         font-size: 10px;
-        min-height: 34px;
+        min-height: 36px;
       }
-      .project-dropdown-wrapper { grid-column: span 1; position: relative; }
+      
+      .project-dropdown-wrapper {
+        flex: 1 1 calc(25% - 6px);
+        min-width: 0;
+        display: flex;
+      }
 
       /* スマホ時の物件ドロップダウン調整（画面からはみ出さず中央寄せ配置） */
       .project-menu-popup {
